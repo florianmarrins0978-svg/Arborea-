@@ -161,12 +161,13 @@
   .form-row{display:flex;flex-direction:column;gap:0.5rem;}
   .form-row.full{grid-column:1 / -1;}
   label{font-size:0.85rem;font-weight:600;color:var(--forest);}
-  input,textarea{
+  input,textarea,select{
     font-family:inherit;font-size:0.98rem;padding:0.85rem 1rem;
     border:1.5px solid var(--line);border-radius:4px;background:var(--cream);color:var(--ink);
   }
-  input:focus,textarea:focus{border-color:var(--moss);outline:none;}
+  input:focus,textarea:focus,select:focus{border-color:var(--moss);outline:none;}
   textarea{min-height:130px;resize:vertical;}
+  input[type="file"]{padding:0.6rem 1rem;border-style:dashed;}
   .form-hint{font-size:0.8rem;color:#6b6b5c;}
 
   .captcha-box{display:flex;align-items:center;gap:1rem;flex-wrap:wrap;}
@@ -247,7 +248,7 @@
   <div class="hero-inner">
     <span class="eyebrow">Élagueur · Paysagiste · Île-de-France</span>
     <h1>L'art du végétal, façonné avec précision.</h1>
-    <p class="lead">Élagage, création de jardin et arrosage automatique. Depuis dix ans, j'accompagne particuliers et professionnels pour des extérieurs sains, sûrs et durables.</p>
+    <p class="lead">Arborea sculpte vos arbres depuis plus de 10 ans.<br>Façonne vos extérieurs en fonction de vos envies.<br>De la cime à la racine, on vous accompagne.</p>
     <div class="btn-row">
       <a href="#devis" class="btn btn-primary">Demander un devis gratuit</a>
       <a href="#realisations" class="btn btn-ghost">Voir les réalisations</a>
@@ -373,7 +374,7 @@
       <p class="lead">Remplissez le formulaire ci-contre avec vos disponibilités : je reviens vers vous sous 48h avec un devis détaillé et gratuit.</p>
       <ul>
         <li><strong>Zone d'intervention</strong>Île-de-France</li>
-        <li><strong>Téléphone</strong>01 23 45 67 89</li>
+        <li><strong>Téléphone</strong><a href="tel:0679984514">06 79 98 45 14</a></li>
         <li><strong>Email</strong>contact@arborea.fr</li>
       </ul>
     </div>
@@ -391,6 +392,11 @@
       </div>
 
       <div class="form-row full">
+        <label for="email">Email *</label>
+        <input type="email" id="email" name="Email" required>
+      </div>
+
+      <div class="form-row full">
         <label for="adresse">Adresse *</label>
         <input type="text" id="adresse" name="Adresse" placeholder="Numéro et nom de rue" required>
       </div>
@@ -398,6 +404,17 @@
       <div class="form-row full">
         <label for="ville">Ville *</label>
         <input type="text" id="ville" name="Ville" required>
+      </div>
+
+      <div class="form-row full">
+        <label for="prestation">Prestation souhaitée *</label>
+        <select id="prestation" name="Prestation" required>
+          <option value="" disabled selected>Choisissez une prestation</option>
+          <option value="Élagage">Élagage</option>
+          <option value="Entretien">Entretien</option>
+          <option value="Création">Création</option>
+          <option value="Autre">Autre</option>
+        </select>
       </div>
 
       <div class="form-grid">
@@ -414,6 +431,12 @@
       <div class="form-row full">
         <label for="description">Description des travaux souhaités *</label>
         <textarea id="description" name="Description" placeholder="Décrivez votre projet : élagage, création de jardin, arrosage automatique, taille du terrain..." required></textarea>
+      </div>
+
+      <div class="form-row full">
+        <label for="photos">Photos de votre projet (optionnel)</label>
+        <input type="file" id="photos" name="Photos" accept="image/*" multiple>
+        <p class="form-hint">Vous pouvez joindre une ou plusieurs photos pour nous aider à mieux cerner votre projet.</p>
       </div>
 
       <div class="form-row full">
@@ -435,7 +458,7 @@
 
 <footer>
   <div class="logo">Arborea</div>
-  <div>© 2026 Arborea — Élagage, création de jardin &amp; arrosage automatique en Île-de-France</div>
+  <div>© 2026 Arborea — Élagage, création de jardin &amp; arrosage automatique en Île-de-France — <a href="tel:0679984514">06 79 98 45 14</a></div>
 </footer>
 
 <script>
