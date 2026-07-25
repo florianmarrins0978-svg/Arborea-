@@ -11,12 +11,14 @@
 <style>
   :root{
     --forest:#1f3626;
-    --forest-light:#39523a;
-    --moss:#6b8a5a;
+    --forest-deep:#152619;
+    --forest-light:#2c4a30;
+    --moss:#4f6d45;
+    --moss-light:#7d9a6d;
     --clay:#b5562a;
     --clay-light:#d97a4d;
-    --cream:#f8f5ee;
-    --paper:#efe9d9;
+    --cream:#fbf8f0;
+    --paper:#f4f0e4;
     --ink:#26261f;
     --line:rgba(31,54,38,0.14);
   }
@@ -53,14 +55,14 @@
   .btn-primary{background:var(--clay);color:var(--cream);}
   .btn-primary:hover{background:var(--clay-light);}
   .btn-ghost{border:1.5px solid var(--cream);color:var(--cream);background:transparent;}
-  .btn-ghost:hover{background:rgba(248,245,238,0.12);}
+  .btn-ghost:hover{background:rgba(251,248,240,0.12);}
 
   /* ---------- HEADER ---------- */
   header{
     position:fixed;top:0;left:0;right:0;z-index:100;
     display:flex;align-items:center;justify-content:space-between;
     padding:1.4rem 6%;
-    background:rgba(248,245,238,0.88);
+    background:rgba(251,248,240,0.88);
     backdrop-filter:blur(10px);
     border-bottom:1px solid var(--line);
   }
@@ -84,8 +86,8 @@
     display:flex;align-items:flex-end;
     padding:7.5rem 0 6rem;
     background-image:
-      linear-gradient(180deg, rgba(31,54,38,0.35) 0%, rgba(26,46,32,0.55) 55%, rgba(17,30,20,0.82) 100%),
-      url('https://placehold.co/1920x1200/4a6b4a/2f4a30?text=Photo+d%27ambiance+%E2%80%94+jardin+Arborea');
+      linear-gradient(180deg, rgba(31,54,38,0.3) 0%, rgba(21,38,25,0.55) 55%, rgba(21,38,25,0.85) 100%),
+      url('https://placehold.co/1920x1200/4f6d45/2c4a30?text=Photo+d%27ambiance+%E2%80%94+jardin+Arborea');
     background-size:cover;
     background-position:center;
   }
@@ -100,15 +102,15 @@
     margin-bottom:1.6rem;
   }
   .hero p.lead{
-    max-width:520px;font-size:1.12rem;color:rgba(248,245,238,0.88);margin-bottom:2.4rem;
+    max-width:520px;font-size:1.12rem;color:rgba(251,248,240,0.88);margin-bottom:2.4rem;
   }
   .btn-row{display:flex;gap:1rem;flex-wrap:wrap;}
   .hero-stats{
     margin-top:4.5rem;display:flex;gap:3rem;flex-wrap:wrap;
-    border-top:1px solid rgba(248,245,238,0.25);padding-top:1.8rem;
+    border-top:1px solid rgba(251,248,240,0.25);padding-top:1.8rem;
   }
   .hero-stats .num{font-family:'Fraunces',serif;font-size:2rem;font-weight:600;color:var(--cream);}
-  .hero-stats .cap{font-size:0.8rem;text-transform:uppercase;letter-spacing:0.08em;color:rgba(248,245,238,0.72);margin-top:0.2rem;}
+  .hero-stats .cap{font-size:0.8rem;text-transform:uppercase;letter-spacing:0.08em;color:rgba(251,248,240,0.72);margin-top:0.2rem;}
 
   /* ---------- SERVICES ---------- */
   .service-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2.5rem;}
@@ -123,9 +125,9 @@
   .about img{border-radius:6px;width:100%;}
   .about .eyebrow{color:#c7d6a8;}
   .about h2{color:var(--cream);font-size:clamp(1.9rem,3.6vw,2.6rem);margin-bottom:1.4rem;}
-  .about p{color:rgba(248,245,238,0.82);margin-bottom:1.2rem;font-size:1.02rem;}
+  .about p{color:rgba(251,248,240,0.82);margin-bottom:1.2rem;font-size:1.02rem;}
   .about ul{margin-top:1.6rem;display:grid;gap:0.7rem;}
-  .about li{display:flex;gap:0.7rem;color:rgba(248,245,238,0.9);font-size:0.98rem;}
+  .about li{display:flex;gap:0.7rem;color:rgba(251,248,240,0.9);font-size:0.98rem;}
   .about li::before{content:'✓';color:var(--clay-light);font-weight:700;}
 
   /* ---------- GALLERY ---------- */
@@ -191,7 +193,7 @@
   .form-status{font-size:0.92rem;font-weight:600;color:var(--forest);}
 
   footer{
-    background:var(--forest);color:rgba(248,245,238,0.75);
+    background:var(--forest);color:rgba(251,248,240,0.75);
     padding:3rem 6%;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem;
     font-size:0.88rem;
   }
