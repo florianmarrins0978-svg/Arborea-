@@ -8,6 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;1,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <style>
   :root{
     --cream:#fbf8f0; --paper:#f4f0e4; --paper-warm:#eae3cd;
@@ -43,7 +44,14 @@
     transition:background .2s ease, color .2s ease;
   }
   .btn-secondary:hover{background:var(--forest-deep);color:var(--cream);}
+  .btn-secondary:disabled{opacity:0.6;cursor:default;}
   .toolbar-actions{display:flex;gap:0.9rem;flex-wrap:wrap;}
+
+  /* État temporaire pendant la génération du PDF : masque les contrôles interactifs */
+  body.exporting-pdf .no-print,
+  body.exporting-pdf .remove-row,
+  body.exporting-pdf .btn-add{display:none !important;}
+  body.exporting-pdf .page{box-shadow:none;}
 
   .page{
     max-width:900px;margin:0 auto;background:var(--cream);border-radius:18px;
@@ -222,7 +230,8 @@
   <span class="brand-mini">Arborea — Modèle de devis</span>
   <div class="toolbar-actions">
     <button class="btn-secondary" id="createFactureBtn" type="button">Valider → Créer la facture</button>
-    <button class="btn-print" onclick="window.print()">Imprimer / Enregistrer en PDF</button>
+    <button class="btn-secondary" id="printBtn" type="button">Imprimer</button>
+    <button class="btn-print" id="savePdfBtn" type="button">Enregistrer en PDF</button>
   </div>
 </div>
 
@@ -413,18 +422,83 @@ IBAN : FR76 3123 3123 4500 2348 1091 175</textarea>
 
   computeTotals();
 
-  /* ---------- Éviter que les zones de texte soient coupées à l'impression ---------- */
-  window.addEventListener('beforeprint', () => {
+  /* ---------- Éviter que les zones de texte soient coupées à l'impression / l'export ---------- */
+  function growNotesTextareas(){
     document.querySelectorAll('.notes textarea').forEach(t => {
       t.dataset.previousHeight = t.style.height;
       t.style.height = 'auto';
       t.style.height = (t.scrollHeight + 4) + 'px';
     });
-  });
-  window.addEventListener('afterprint', () => {
+  }
+  function restoreNotesTextareas(){
     document.querySelectorAll('.notes textarea').forEach(t => {
       t.style.height = t.dataset.previousHeight || '';
     });
+  }
+  window.addEventListener('beforeprint', growNotesTextareas);
+  window.addEventListener('afterprint', restoreNotesTextareas);
+
+  /* ---------- Bouton Imprimer ---------- */
+  document.getElementById('printBtn').addEventListener('click', () => {
+    window.print();
+  });
+
+  /* ---------- Bouton Enregistrer en PDF ---------- */
+  const savePdfBtn = document.getElementById('savePdfBtn');
+  savePdfBtn.addEventListener('click', async () => {
+    savePdfBtn.disabled = true;
+    const originalLabel = savePdfBtn.textContent;
+    savePdfBtn.textContent = 'Génération du PDF...';
+
+    growNotesTextareas();
+    document.body.classList.add('exporting-pdf');
+
+    const num = (document.getElementById('devisNum') || {}).value || 'Arborea';
+    const filename = `Devis-${num}.pdf`.replace(/[^a-zA-Z0-9.\-_]/g, '_');
+    const pageEl = document.getElementById('quotePage');
+
+    const opts = {
+      margin: 8,
+      filename,
+      image: { type: 'jpeg', quality: 0.98 },
+      html2canvas: { scale: 2, useCORS: true, backgroundColor: '#ffffff' },
+      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+      pagebreak: { mode: ['avoid-all'] }
+    };
+
+    try{
+      const blob = await html2pdf().set(opts).from(pageEl).outputPdf('blob');
+
+      if (window.showSaveFilePicker){
+        try{
+          const handle = await window.showSaveFilePicker({
+            suggestedName: filename,
+            types: [{ description: 'Fichier PDF', accept: { 'application/pdf': ['.pdf'] } }]
+          });
+          const writable = await handle.createWritable();
+          await writable.write(blob);
+          await writable.close();
+        } catch(pickerErr){
+          if (pickerErr.name !== 'AbortError') throw pickerErr;
+        }
+      } else {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
+      }
+    } catch(err){
+      alert("Une erreur est survenue lors de la génération du PDF. Vous pouvez utiliser le bouton \"Imprimer\" puis choisir \"Enregistrer en PDF\" comme imprimante.");
+    } finally {
+      document.body.classList.remove('exporting-pdf');
+      restoreNotesTextareas();
+      savePdfBtn.disabled = false;
+      savePdfBtn.textContent = originalLabel;
+    }
   });
 
   /* ---------- Pré-remplissage depuis une demande de devis du site ---------- */
