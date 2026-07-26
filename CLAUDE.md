@@ -19,6 +19,28 @@ Les gabarits existants (modèle de devis, système de facturation, base
 clients, arborescence de dossiers) font référence : ne jamais modifier leur
 structure sans autorisation explicite.
 
+### Configuration actuelle (source de vérité)
+
+- **Boîte mail à surveiller pour les demandes de devis** :
+  `arboreapro@outlook.com`, via le connecteur Microsoft 365 (Outlook). Tant
+  que ce connecteur n'est pas actif/accessible dans la session, signaler le
+  blocage plutôt que de supposer un accès.
+- **Grille tarifaire** : aucune grille fixe n'existe pour l'instant. Le
+  dirigeant fixe lui-même les prix, prestation par prestation. Conséquence
+  directe de l'Étape 4 : la condition « tarifs standards » n'est jamais
+  remplie automatiquement → **tout devis reste en Étape 5 (validation
+  humaine obligatoire, motif « prix non défini »)** tant qu'aucune grille
+  n'est communiquée. Préparer malgré tout tout le reste (infos client,
+  brouillon de devis avec prestations mais montants à confirmer, e-mail
+  client prêt) pour minimiser le travail restant du dirigeant.
+- **Envoi client** : ne jamais envoyer un e-mail ou un devis directement à
+  un client. Toujours préparer un **brouillon** (Gmail/Outlook) et laisser
+  le dirigeant relire et cliquer lui-même sur Envoyer.
+- Le formulaire de devis du site (`Le vrai .html`, section `#contact`)
+  envoie actuellement vers `florian.martins0978@laposte.net` via
+  formsubmit.co, avec un brouillon de devis textuel intégré au corps du
+  mail. Ne pas modifier cette destination sans demande explicite.
+
 ### Étape 1 — Analyse de l'e-mail client
 
 Extraire : nom du client, coordonnées, adresse du chantier/prestation,
