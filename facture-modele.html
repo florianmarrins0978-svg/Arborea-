@@ -370,6 +370,14 @@ IBAN : FR76 3123 3123 4500 2348 1091 175</textarea>
     return value.toLocaleString('fr-FR', { style: 'currency', currency: 'EUR' });
   }
 
+  function slugifyName(str){
+    return (str || '')
+      .normalize('NFD').replace(/[̀-ͯ]/g, '')
+      .replace(/[^a-zA-Z0-9\s-]/g, '')
+      .trim()
+      .replace(/\s+/g, '-');
+  }
+
   function computeTotals(){
     let totalHT = 0;
     linesBody.querySelectorAll('tr').forEach(row => {
@@ -490,7 +498,8 @@ IBAN : FR76 3123 3123 4500 2348 1091 175</textarea>
     document.body.classList.add('exporting-pdf');
 
     const num = (document.getElementById('factureNum') || {}).value || 'Arborea';
-    const filename = `Facture-${num}.pdf`.replace(/[^a-zA-Z0-9.\-_]/g, '_');
+    const clientSlug = slugifyName((document.getElementById('clientNom') || {}).value);
+    const filename = (clientSlug ? `Facture-${num}-${clientSlug}.pdf` : `Facture-${num}.pdf`).replace(/[^a-zA-Z0-9.\-_]/g, '_');
     const pageEl = document.getElementById('invoicePage');
 
     const opts = {
