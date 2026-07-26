@@ -118,6 +118,36 @@
   .ocr-preview{max-width:120px;border-radius:8px;display:none;}
   .ocr-preview.show{display:block;}
 
+  .ocr-buttons{display:flex;gap:0.9rem;flex-wrap:wrap;align-items:center;margin-bottom:1rem;}
+  .btn-scan{
+    display:inline-flex;align-items:center;gap:0.6rem;background:var(--forest-deep);color:var(--cream);
+    border:none;border-radius:8px;padding:0.75rem 1.2rem;font-size:0.86rem;font-weight:600;cursor:pointer;
+    transition:background .2s ease;
+  }
+  .btn-scan:hover{background:var(--forest-mid);}
+  .live-scan-overlay{
+    position:fixed;inset:0;background:rgba(21,38,25,0.92);z-index:999;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1.2rem;padding:1.5rem;
+  }
+  .live-scan-overlay[hidden]{display:none;}
+  .live-scan-overlay video{
+    width:100%;max-width:480px;border-radius:14px;box-shadow:0 10px 40px rgba(0,0,0,0.4);
+    border:2px solid var(--sage-light);
+  }
+  .live-scan-status{
+    color:var(--cream);font-size:0.95rem;font-weight:500;text-align:center;max-width:420px;
+  }
+  .live-scan-status.detecting::before{
+    content:'';display:inline-block;width:0.5rem;height:0.5rem;border-radius:50%;background:var(--clay-light);
+    margin-right:0.5rem;animation:pulse-dot 1s ease-in-out infinite;
+  }
+  @keyframes pulse-dot{0%,100%{opacity:0.3;}50%{opacity:1;}}
+  .btn-scan-stop{
+    background:transparent;color:var(--cream);border:1.5px solid var(--cream);border-radius:30px;
+    padding:0.7rem 1.6rem;font-weight:600;font-size:0.86rem;cursor:pointer;
+  }
+  .btn-scan-stop:hover{background:var(--cream);color:var(--forest-deep);}
+
   .achat-form{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:1rem;margin-bottom:1rem;}
   .achat-form .form-row{display:flex;flex-direction:column;gap:0.4rem;}
   .achat-form label{font-size:0.7rem;letter-spacing:0.05em;text-transform:uppercase;color:#6b6b5c;font-weight:600;}
@@ -249,17 +279,27 @@
     </div>
 
     <div class="ocr-panel no-print">
-      <div class="ocr-upload-row">
+      <div class="ocr-buttons">
+        <button type="button" class="btn-scan" id="startLiveScanBtn">📷 Scanner en direct</button>
         <label class="file-label">
-          📷 Scanner un justificatif
+          Importer une photo
           <input type="file" id="receiptInput" accept="image/*" capture="environment">
         </label>
+      </div>
+      <div class="ocr-upload-row">
         <span class="ocr-status" id="ocrStatus"></span>
         <img class="ocr-preview" id="ocrPreview" alt="Aperçu du justificatif">
       </div>
       <p class="form-hint" style="font-size:0.8rem;color:#7a7a6a;margin-bottom:1rem;">
-        La lecture automatique (OCR) propose des montants à partir de la photo — vérifiez-les toujours avant d'ajouter l'achat, elle peut se tromper.
+        Avec « Scanner en direct », il suffit de pointer la caméra sur le justificatif : les montants sont détectés et remplis automatiquement dès qu'ils sont lisibles — vérifiez-les toujours avant d'ajouter l'achat, la lecture peut se tromper.
       </p>
+
+      <div class="live-scan-overlay no-print" id="liveScanOverlay" hidden>
+        <video id="liveScanVideo" autoplay muted playsinline></video>
+        <canvas id="liveScanCanvas" hidden></canvas>
+        <p class="live-scan-status" id="liveScanStatus">Pointez la caméra sur le justificatif…</p>
+        <button type="button" class="btn-scan-stop" id="stopLiveScanBtn">Arrêter le scan</button>
+      </div>
       <div class="achat-form">
         <div class="form-row">
           <label for="achatFournisseur">Fournisseur / description</label>
@@ -450,6 +490,7 @@
   achatDateInput.valueAsDate = new Date();
 
   document.getElementById('addAchatBtn').addEventListener('click', () => {
+    if (typeof liveScanActive !== 'undefined' && liveScanActive) stopLiveScan();
     const ht = parseFloat(achatHTInput.value) || 0;
     const tva = parseFloat(achatTVAInput.value) || 0;
     if (!achatFournisseurInput.value && !ht && !tva) return;
@@ -480,9 +521,10 @@
   const ocrStatus = document.getElementById('ocrStatus');
   const ocrPreview = document.getElementById('ocrPreview');
 
-  function parseReceiptText(text){
+  function parseReceiptText(text, opts){
+    opts = opts || {};
     const lines = text.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
-    let ttc = null, ht = null, rate = null;
+    let ttc = null, ht = null, rate = null, matchedKeyword = false;
 
     const amountPattern = /(\d{1,5}[.,]\d{2})(?!\s*%)/;
     const ratePattern = /(\d{1,2}(?:[.,]\d{1,2})?)\s*%/;
@@ -491,7 +533,7 @@
       const lower = line.toLowerCase();
       if (ttc === null && /(total\s*ttc|net\s*à\s*payer|montant\s*ttc)/.test(lower)){
         const m = line.match(amountPattern);
-        if (m) ttc = parseFloat(m[1].replace(',', '.'));
+        if (m){ ttc = parseFloat(m[1].replace(',', '.')); matchedKeyword = true; }
       }
       if (ht === null && /(total\s*ht|montant\s*ht)/.test(lower)){
         const m = line.match(amountPattern);
@@ -503,26 +545,31 @@
       }
     }
 
-    if (ttc === null){
+    if (ttc === null && !opts.requireKeyword){
       // dernier recours : plus grand montant détecté dans tout le texte
       const all = [...text.matchAll(new RegExp(amountPattern, 'g'))].map(m => parseFloat(m[1].replace(',', '.')));
       if (all.length) ttc = Math.max(...all);
     }
     if (rate === null) rate = 20;
 
+    if (ttc === null){
+      return { ht: '', tva: '', fournisseur: lines[0] || '', matched: false };
+    }
+
     let computedHT = ht;
     let computedTVA = null;
-    if (ttc !== null && computedHT !== null){
+    if (computedHT !== null){
       computedTVA = ttc - computedHT;
-    } else if (ttc !== null){
+    } else {
       computedHT = ttc / (1 + rate / 100);
       computedTVA = ttc - computedHT;
     }
 
     return {
-      ht: computedHT !== null ? Math.round(computedHT * 100) / 100 : '',
-      tva: computedTVA !== null ? Math.round(computedTVA * 100) / 100 : '',
-      fournisseur: lines[0] || ''
+      ht: Math.round(computedHT * 100) / 100,
+      tva: Math.round(computedTVA * 100) / 100,
+      fournisseur: lines[0] || '',
+      matched: matchedKeyword
     };
   }
 
@@ -557,6 +604,107 @@
       ocrStatus.textContent = "La lecture automatique a échoué — merci de saisir les montants manuellement.";
     }
   });
+
+  /* ---------- Scan en direct via la caméra ---------- */
+  const startLiveScanBtn = document.getElementById('startLiveScanBtn');
+  const stopLiveScanBtn = document.getElementById('stopLiveScanBtn');
+  const liveScanOverlay = document.getElementById('liveScanOverlay');
+  const liveScanVideo = document.getElementById('liveScanVideo');
+  const liveScanCanvas = document.getElementById('liveScanCanvas');
+  const liveScanStatus = document.getElementById('liveScanStatus');
+
+  let liveScanActive = false;
+  let liveScanStream = null;
+  let liveScanWorker = null;
+
+  async function startLiveScan(){
+    if (typeof Tesseract === 'undefined'){
+      ocrStatus.textContent = "Lecture automatique indisponible — merci de saisir les montants manuellement.";
+      return;
+    }
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){
+      ocrStatus.textContent = "Caméra non disponible sur cet appareil — utilisez \"Importer une photo\".";
+      return;
+    }
+    try{
+      liveScanStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: 'environment' } } });
+    } catch(err){
+      ocrStatus.textContent = "Impossible d'accéder à la caméra — vérifiez les autorisations, ou utilisez \"Importer une photo\".";
+      return;
+    }
+
+    liveScanVideo.srcObject = liveScanStream;
+    liveScanOverlay.hidden = false;
+    liveScanStatus.textContent = 'Pointez la caméra sur le justificatif…';
+    liveScanStatus.classList.remove('detecting');
+    ocrStatus.textContent = '';
+    liveScanActive = true;
+
+    try{
+      liveScanWorker = await Tesseract.createWorker('fra');
+    } catch(err){
+      stopLiveScan("Lecture automatique indisponible — merci de saisir les montants manuellement.");
+      return;
+    }
+
+    liveScanLoop();
+  }
+
+  function stopLiveScan(message){
+    liveScanActive = false;
+    if (liveScanStream){
+      liveScanStream.getTracks().forEach(t => t.stop());
+      liveScanStream = null;
+    }
+    liveScanOverlay.hidden = true;
+    if (liveScanWorker){
+      const worker = liveScanWorker;
+      liveScanWorker = null;
+      worker.terminate().catch(() => {});
+    }
+    if (message) ocrStatus.textContent = message;
+  }
+
+  async function liveScanLoop(){
+    while (liveScanActive){
+      await new Promise(r => setTimeout(r, 350));
+      if (!liveScanActive) break;
+      if (!liveScanVideo.videoWidth) continue;
+
+      liveScanCanvas.width = liveScanVideo.videoWidth;
+      liveScanCanvas.height = liveScanVideo.videoHeight;
+      liveScanCanvas.getContext('2d').drawImage(liveScanVideo, 0, 0, liveScanCanvas.width, liveScanCanvas.height);
+
+      const blob = await new Promise(resolve => liveScanCanvas.toBlob(resolve, 'image/jpeg', 0.85));
+      if (!liveScanActive || !blob || !liveScanWorker) break;
+
+      liveScanStatus.textContent = 'Analyse en cours…';
+      liveScanStatus.classList.add('detecting');
+      try{
+        const { data } = await liveScanWorker.recognize(blob);
+        if (!liveScanActive) break;
+        const parsed = parseReceiptText(data.text || '', { requireKeyword: true });
+        if (parsed.matched && parsed.ht !== '' && parsed.tva !== ''){
+          if (parsed.fournisseur) achatFournisseurInput.value = parsed.fournisseur.slice(0, 60);
+          achatHTInput.value = parsed.ht;
+          achatTVAInput.value = parsed.tva;
+          ocrPreview.classList.remove('show');
+          stopLiveScan("Montants détectés — vérifiez-les avant d'ajouter l'achat.");
+          break;
+        } else {
+          liveScanStatus.textContent = 'Recherche des montants… rapprochez et stabilisez la caméra.';
+          liveScanStatus.classList.remove('detecting');
+        }
+      } catch(err){
+        liveScanStatus.textContent = 'Recherche des montants…';
+        liveScanStatus.classList.remove('detecting');
+      }
+    }
+  }
+
+  startLiveScanBtn.addEventListener('click', startLiveScan);
+  stopLiveScanBtn.addEventListener('click', () => stopLiveScan());
+  window.addEventListener('pagehide', () => stopLiveScan());
 
   /* ---------- Impression et export PDF ---------- */
   document.getElementById('printBtn').addEventListener('click', () => window.print());
