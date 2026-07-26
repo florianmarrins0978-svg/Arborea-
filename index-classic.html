@@ -1,0 +1,510 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Arborea — Élagueur paysagiste en Île-de-France</title>
+<meta name="description" content="Arborea — élagage, création de jardin et arrosage automatique. 10 ans d'expérience. Devis gratuit sous 48h.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --forest:#1f3626;
+    --forest-deep:#152619;
+    --forest-light:#2c4a30;
+    --moss:#4f6d45;
+    --moss-light:#7d9a6d;
+    --clay:#b5562a;
+    --clay-light:#d97a4d;
+    --cream:#fbf8f0;
+    --paper:#f4f0e4;
+    --ink:#26261f;
+    --line:rgba(31,54,38,0.14);
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    background:var(--cream);
+    color:var(--ink);
+    font-family:'Inter',sans-serif;
+    line-height:1.7;
+    overflow-x:hidden;
+  }
+  h1,h2,h3,h4{font-family:'Fraunces',serif;font-weight:600;color:var(--forest);letter-spacing:-0.01em;}
+  a{color:inherit;text-decoration:none;}
+  img{display:block;max-width:100%;}
+  button{font-family:inherit;cursor:pointer;}
+  ul{list-style:none;}
+  :focus-visible{outline:3px solid var(--clay-light);outline-offset:3px;}
+  .wrap{max-width:1180px;margin:0 auto;padding:0 6%;}
+  .eyebrow{
+    font-size:0.78rem;letter-spacing:0.16em;text-transform:uppercase;
+    color:var(--clay);font-weight:600;display:block;margin-bottom:1rem;
+  }
+  section{padding:7rem 0;}
+  .section-head{max-width:640px;margin-bottom:3.5rem;}
+  .section-head h2{font-size:clamp(1.9rem,3.6vw,2.7rem);line-height:1.15;}
+  .section-head p{margin-top:1rem;color:#4a4a3f;font-size:1.05rem;}
+  .btn{
+    display:inline-flex;align-items:center;gap:0.6rem;
+    padding:1rem 2rem;font-weight:600;font-size:0.98rem;border:none;border-radius:2px;
+    transition:transform .2s ease, background .2s ease;
+  }
+  .btn:hover{transform:translateY(-2px);}
+  .btn-primary{background:var(--clay);color:var(--cream);}
+  .btn-primary:hover{background:var(--clay-light);}
+  .btn-ghost{border:1.5px solid var(--cream);color:var(--cream);background:transparent;}
+  .btn-ghost:hover{background:rgba(251,248,240,0.12);}
+
+  /* ---------- HEADER ---------- */
+  header{
+    position:fixed;top:0;left:0;right:0;z-index:100;
+    display:flex;align-items:center;justify-content:space-between;
+    padding:1.4rem 6%;
+    background:rgba(251,248,240,0.88);
+    backdrop-filter:blur(10px);
+    border-bottom:1px solid var(--line);
+  }
+  .logo{font-family:'Fraunces',serif;font-weight:600;font-size:1.4rem;color:var(--forest);}
+  nav ul{display:flex;gap:2.2rem;}
+  nav a{font-size:0.92rem;font-weight:500;position:relative;padding:4px 0;}
+  nav a::after{content:'';position:absolute;bottom:0;left:0;width:0;height:2px;background:var(--clay);transition:width .25s ease;}
+  nav a:hover::after{width:100%;}
+  .nav-right{display:flex;align-items:center;gap:1.6rem;}
+  .nav-cta{
+    background:var(--forest);color:var(--cream);padding:0.6rem 1.3rem;border-radius:30px;
+    font-size:0.88rem;font-weight:600;transition:background .2s;
+  }
+  .nav-cta:hover{background:var(--forest-light);}
+  .menu-toggle{display:none;background:none;border:none;font-size:1.6rem;color:var(--forest);}
+
+  /* ---------- HERO ---------- */
+  .hero{
+    position:relative;
+    min-height:92vh;
+    display:flex;align-items:flex-end;
+    padding:7.5rem 0 6rem;
+    background-image:
+      linear-gradient(180deg, rgba(125,154,109,0.4) 0%, rgba(79,109,69,0.6) 55%, rgba(44,74,48,0.85) 100%),
+      url('https://placehold.co/1920x1200/7d9a6d/4f6d45?text=Photo+d%27ambiance+%E2%80%94+jardin+Arborea');
+    background-size:cover;
+    background-position:center;
+  }
+  .hero-inner{max-width:1180px;margin:0 auto;padding:0 6%;color:var(--cream);}
+  .hero .eyebrow{color:#e9c9a8;}
+  .hero h1{
+    color:var(--cream);
+    font-weight:500;
+    font-size:clamp(2.6rem,6vw,4.4rem);
+    line-height:1.08;
+    max-width:800px;
+    margin-bottom:1.6rem;
+  }
+  .hero p.lead{
+    max-width:520px;font-size:1.12rem;color:rgba(251,248,240,0.88);margin-bottom:2.4rem;
+  }
+  .btn-row{display:flex;gap:1rem;flex-wrap:wrap;}
+  .hero-stats{
+    margin-top:4.5rem;display:flex;gap:3rem;flex-wrap:wrap;
+    border-top:1px solid rgba(251,248,240,0.25);padding-top:1.8rem;
+  }
+  .hero-stats .num{font-family:'Fraunces',serif;font-size:2rem;font-weight:600;color:var(--cream);}
+  .hero-stats .cap{font-size:0.8rem;text-transform:uppercase;letter-spacing:0.08em;color:rgba(251,248,240,0.72);margin-top:0.2rem;}
+
+  /* ---------- SERVICES ---------- */
+  .service-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2.5rem;}
+  .service-card{padding:2.4rem 2rem;background:var(--paper);border-radius:6px;}
+  .service-icon{width:44px;height:44px;color:var(--forest);margin-bottom:1.6rem;}
+  .service-card h3{font-size:1.3rem;margin-bottom:0.8rem;}
+  .service-card p{color:#4a4a3f;font-size:0.98rem;}
+
+  /* ---------- ABOUT ---------- */
+  .about{background:var(--forest);color:var(--cream);}
+  .about .wrap{display:grid;grid-template-columns:1fr 1fr;gap:4rem;align-items:center;}
+  .about img{border-radius:6px;width:100%;}
+  .about .eyebrow{color:#c7d6a8;}
+  .about h2{color:var(--cream);font-size:clamp(1.9rem,3.6vw,2.6rem);margin-bottom:1.4rem;}
+  .about p{color:rgba(251,248,240,0.82);margin-bottom:1.2rem;font-size:1.02rem;}
+  .about ul{margin-top:1.6rem;display:grid;gap:0.7rem;}
+  .about li{display:flex;gap:0.7rem;color:rgba(251,248,240,0.9);font-size:0.98rem;}
+  .about li::before{content:'✓';color:var(--clay-light);font-weight:700;}
+
+  /* ---------- GALLERY ---------- */
+  .gallery-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.6rem;}
+  .gallery-grid figure{border-radius:6px;overflow:hidden;position:relative;}
+  .gallery-grid img{width:100%;height:280px;object-fit:cover;transition:transform .4s ease;}
+  .gallery-grid figure:hover img{transform:scale(1.05);}
+  .gallery-grid figcaption{
+    position:absolute;left:0;right:0;bottom:0;padding:1rem 1.2rem;
+    background:linear-gradient(0deg, rgba(15,24,15,0.85), transparent);
+    color:var(--cream);font-size:0.88rem;font-weight:500;
+  }
+
+  /* ---------- TESTIMONIALS ---------- */
+  .testimonials{background:var(--paper);}
+  .testi-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:2rem;}
+  .testi-card{background:var(--cream);padding:2.2rem;border-radius:6px;}
+  .testi-card p{font-family:'Fraunces',serif;font-size:1.15rem;color:var(--forest);line-height:1.5;margin-bottom:1.2rem;}
+  .testi-name{font-size:0.85rem;color:#5b5545;font-weight:600;}
+
+  /* ---------- DEVIS / CONTACT ---------- */
+  .devis .wrap{display:grid;grid-template-columns:0.85fr 1.15fr;gap:4.5rem;}
+  .devis-info h2{font-size:clamp(1.9rem,3.6vw,2.6rem);margin-bottom:1.2rem;}
+  .devis-info p.lead{color:#4a4a3f;margin-bottom:2rem;max-width:420px;}
+  .devis-info ul{display:grid;gap:1rem;margin-bottom:2rem;}
+  .devis-info li{font-size:0.95rem;color:#4a4a3f;}
+  .devis-info li strong{display:block;color:var(--forest);font-weight:600;margin-bottom:0.15rem;}
+
+  form{display:grid;gap:1.3rem;}
+  .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.3rem;}
+  .form-row{display:flex;flex-direction:column;gap:0.5rem;}
+  .form-row.full{grid-column:1 / -1;}
+  label{font-size:0.85rem;font-weight:600;color:var(--forest);}
+  input,textarea,select{
+    font-family:inherit;font-size:0.98rem;padding:0.85rem 1rem;
+    border:1.5px solid var(--line);border-radius:4px;background:var(--cream);color:var(--ink);
+  }
+  input:focus,textarea:focus,select:focus{border-color:var(--moss);outline:none;}
+  textarea{min-height:130px;resize:vertical;}
+  input[type="file"]{padding:0.6rem 1rem;border-style:dashed;}
+  .form-hint{font-size:0.8rem;color:#6b6b5c;}
+
+  .captcha-box{display:flex;align-items:center;gap:1rem;flex-wrap:wrap;}
+  .captcha-challenge{
+    font-family:'Fraunces',serif;font-weight:600;font-size:1.15rem;color:var(--forest);
+    background:var(--paper);padding:0.8rem 1.2rem;border-radius:4px;user-select:none;
+  }
+  .captcha-box input{max-width:130px;}
+  .captcha-refresh{
+    background:none;border:1.5px solid var(--line);border-radius:4px;padding:0.7rem 0.9rem;
+    color:var(--forest);font-size:0.85rem;font-weight:600;
+  }
+  .captcha-refresh:hover{background:var(--paper);}
+  .captcha-error{display:none;color:var(--clay);font-size:0.85rem;font-weight:600;}
+  .captcha-error.show{display:block;}
+  input.invalid{border-color:var(--clay);}
+
+  .form-submit{
+    background:var(--clay);color:var(--cream);border:none;padding:1.05rem 2rem;
+    font-weight:600;font-size:1rem;border-radius:4px;transition:background .2s, transform .2s;
+    justify-self:start;
+  }
+  .form-submit:hover{background:var(--clay-light);transform:translateY(-2px);}
+  .form-status{font-size:0.92rem;font-weight:600;color:var(--forest);}
+
+  footer{
+    background:var(--forest);color:rgba(251,248,240,0.75);
+    padding:3rem 6%;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem;
+    font-size:0.88rem;
+  }
+  footer .logo{color:var(--cream);}
+
+  @media (max-width:900px){
+    section{padding:5rem 0;}
+    .nav-right .nav-cta{display:none;}
+    .menu-toggle{display:block;}
+    nav{
+      position:fixed;top:68px;left:0;right:0;
+      background:var(--cream);border-bottom:1px solid var(--line);
+      display:none;padding:1.5rem 6%;
+    }
+    nav.open{display:block;}
+    nav ul{flex-direction:column;gap:1.2rem;}
+    .service-grid{grid-template-columns:1fr;}
+    .about .wrap{grid-template-columns:1fr;}
+    .about img{order:-1;}
+    .gallery-grid{grid-template-columns:repeat(2,1fr);}
+    .testi-grid{grid-template-columns:1fr;}
+    .devis .wrap{grid-template-columns:1fr;}
+    .form-grid{grid-template-columns:1fr;}
+  }
+  @media (max-width:520px){
+    .gallery-grid{grid-template-columns:1fr;}
+    .hero-stats{gap:2rem;}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <a href="#" class="logo">Arborea</a>
+  <nav id="navLinks">
+    <ul>
+      <li><a href="#prestations">Prestations</a></li>
+      <li><a href="#a-propos">À propos</a></li>
+      <li><a href="#realisations">Réalisations</a></li>
+      <li><a href="#avis">Avis</a></li>
+      <li><a href="#devis">Contact</a></li>
+    </ul>
+  </nav>
+  <div class="nav-right">
+    <a href="#devis" class="nav-cta">Demander un devis</a>
+    <button class="menu-toggle" id="menuToggle" aria-label="Ouvrir le menu">☰</button>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="hero-inner">
+    <span class="eyebrow">Élagueur · Paysagiste · Île-de-France</span>
+    <h1>L'art du végétal, façonné avec précision.</h1>
+    <p class="lead">Arborea sculpte vos arbres depuis plus de 10 ans.<br>Façonne vos extérieurs en fonction de vos envies.<br>De la cime à la racine, on vous accompagne.</p>
+    <div class="btn-row">
+      <a href="#devis" class="btn btn-primary">Demander un devis gratuit</a>
+      <a href="#realisations" class="btn btn-ghost">Voir les réalisations</a>
+    </div>
+    <div class="hero-stats">
+      <div><div class="num">10 ans</div><div class="cap">d'expérience</div></div>
+      <div><div class="num">48h</div><div class="cap">réponse devis</div></div>
+      <div><div class="num">100%</div><div class="cap">Île-de-France</div></div>
+    </div>
+  </div>
+</section>
+
+<section class="services" id="prestations">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="eyebrow">Prestations</span>
+      <h2>Trois savoir-faire, un même soin du détail</h2>
+      <p>Chaque intervention est pensée sur mesure, en fonction de votre terrain, de vos envies et du rythme des saisons.</p>
+    </div>
+    <div class="service-grid">
+      <div class="service-card">
+        <svg class="service-icon" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <path d="M24 44V20"/><path d="M24 20C24 10 16 6 8 8c0 8 6 14 16 12Z"/><path d="M24 26C24 18 32 14 40 16c0 8-6 13-16 10Z"/>
+        </svg>
+        <h3>Élagage</h3>
+        <p>Taille architecturée ou d'entretien, démontage d'arbres dangereux ou malades, abattage raisonné. Matériel professionnel, sécurité garantie.</p>
+      </div>
+      <div class="service-card">
+        <svg class="service-icon" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <path d="M8 40h32"/><path d="M14 40V26c0-6 4-10 10-10s10 4 10 10v14"/><path d="M24 16V6"/><path d="M18 12l6-6 6 6"/>
+        </svg>
+        <h3>Création de jardin</h3>
+        <p>Conception d'espaces verts sur mesure : choix des végétaux, plantation, aménagement et création de terrasses.</p>
+      </div>
+      <div class="service-card">
+        <svg class="service-icon" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <path d="M24 6C24 6 14 20 14 28a10 10 0 0 0 20 0C34 20 24 6 24 6Z"/><path d="M8 40c2-3 6-3 8 0s6 3 8 0 6-3 8 0 6 3 8 0"/>
+        </svg>
+        <h3>Arrosage automatique</h3>
+        <p>Étude, installation et réglage de systèmes d'arrosage automatique — un jardin toujours vert, sans effort.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="about" id="a-propos">
+  <div class="wrap">
+    <div>
+      <span class="eyebrow">À propos</span>
+      <h2>Dix années sur le terrain</h2>
+      <p>Passionné par le végétal depuis toujours, j'interviens depuis dix ans chez les particuliers et les professionnels d'Île-de-France pour entretenir, façonner et faire pousser des espaces verts durables.</p>
+      <p>Chaque projet commence par une visite sur place et une écoute attentive de vos besoins, pour un résultat fidèle à vos envies et respectueux du vivant.</p>
+      <ul>
+        <li>Diagnostic et devis gratuits, sans engagement</li>
+        <li>Matériel professionnel et interventions sécurisées</li>
+        <li>Approche respectueuse des cycles naturels</li>
+      </ul>
+    </div>
+    <img src="https://placehold.co/900x1100/39523a/f8f5ee?text=Photo+%E2%80%94+Arborea+au+travail" alt="Photo d'ambiance — Arborea sur un chantier (image de démonstration)">
+  </div>
+</section>
+
+<section class="gallery" id="realisations">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="eyebrow">Réalisations</span>
+      <h2>Quelques chantiers récents</h2>
+      <p>Un aperçu de projets menés en Île-de-France, du diagnostic à la finition.</p>
+    </div>
+    <div class="gallery-grid">
+      <figure>
+        <img src="https://placehold.co/600x400/2c4530/f8f5ee?text=Élagage+%E2%80%94+tilleul" alt="Photo placeholder — élagage d'un tilleul">
+        <figcaption>Élagage d'un tilleul — Yvelines</figcaption>
+      </figure>
+      <figure>
+        <img src="https://placehold.co/600x400/3f5d34/f8f5ee?text=Création+de+jardin" alt="Photo placeholder — création de jardin">
+        <figcaption>Création de jardin — Essonne</figcaption>
+      </figure>
+      <figure>
+        <img src="https://placehold.co/600x400/b5562a/f8f5ee?text=Arrosage+automatique" alt="Photo placeholder — installation d'arrosage automatique">
+        <figcaption>Pose d'arrosage automatique — Paris</figcaption>
+      </figure>
+      <figure>
+        <img src="https://placehold.co/600x400/6b8a5a/f8f5ee?text=Taille+de+haie" alt="Photo placeholder — taille de haie">
+        <figcaption>Taille de haie — Val-de-Marne</figcaption>
+      </figure>
+      <figure>
+        <img src="https://placehold.co/600x400/223a26/f8f5ee?text=Terrasse+bois" alt="Photo placeholder — terrasse en bois">
+        <figcaption>Création de terrasse bois — Hauts-de-Seine</figcaption>
+      </figure>
+      <figure>
+        <img src="https://placehold.co/600x400/8a6a4a/f8f5ee?text=Abattage+raisonné" alt="Photo placeholder — abattage raisonné">
+        <figcaption>Abattage raisonné — Seine-et-Marne</figcaption>
+      </figure>
+    </div>
+  </div>
+</section>
+
+<section class="testimonials" id="avis">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="eyebrow">Avis clients</span>
+      <h2>Ce qu'en disent les clients</h2>
+    </div>
+    <div class="testi-grid">
+      <div class="testi-card">
+        <p>« Création de notre jardin de A à Z, du plan à la plantation. Résultat au-delà de nos attentes. »</p>
+        <div class="testi-name">— Client à Versailles</div>
+      </div>
+      <div class="testi-card">
+        <p>« Installation de l'arrosage automatique en une journée, tout fonctionne parfaitement depuis. »</p>
+        <div class="testi-name">— Client à Boulogne-Billancourt</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="devis" id="devis">
+  <div class="wrap">
+    <div class="devis-info">
+      <span class="eyebrow">Devis gratuit</span>
+      <h2>Parlons de votre projet</h2>
+      <p class="lead">Remplissez le formulaire ci-contre avec vos disponibilités : je reviens vers vous sous 48h avec un devis détaillé et gratuit.</p>
+      <ul>
+        <li><strong>Zone d'intervention</strong>Île-de-France</li>
+        <li><strong>Téléphone</strong><a href="tel:0679984514">06 79 98 45 14</a></li>
+        <li><strong>Email</strong>contact@arborea.fr</li>
+      </ul>
+    </div>
+
+    <form id="devisForm" novalidate>
+      <div class="form-grid">
+        <div class="form-row">
+          <label for="nom">Nom *</label>
+          <input type="text" id="nom" name="Nom" required>
+        </div>
+        <div class="form-row">
+          <label for="prenom">Prénom *</label>
+          <input type="text" id="prenom" name="Prenom" required>
+        </div>
+      </div>
+
+      <div class="form-row full">
+        <label for="email">Email *</label>
+        <input type="email" id="email" name="Email" required>
+      </div>
+
+      <div class="form-row full">
+        <label for="adresse">Adresse *</label>
+        <input type="text" id="adresse" name="Adresse" placeholder="Numéro et nom de rue" required>
+      </div>
+
+      <div class="form-row full">
+        <label for="ville">Ville *</label>
+        <input type="text" id="ville" name="Ville" required>
+      </div>
+
+      <div class="form-row full">
+        <label for="prestation">Prestation souhaitée *</label>
+        <select id="prestation" name="Prestation" required>
+          <option value="" disabled selected>Choisissez une prestation</option>
+          <option value="Élagage">Élagage</option>
+          <option value="Entretien">Entretien</option>
+          <option value="Création">Création</option>
+          <option value="Autre">Autre</option>
+        </select>
+      </div>
+
+      <div class="form-grid">
+        <div class="form-row">
+          <label for="dispo1">Disponibilité — premier rendez-vous *</label>
+          <input type="datetime-local" id="dispo1" name="Disponibilite1" required>
+        </div>
+        <div class="form-row">
+          <label for="dispo2">Disponibilité — deuxième rendez-vous *</label>
+          <input type="datetime-local" id="dispo2" name="Disponibilite2" required>
+        </div>
+      </div>
+
+      <div class="form-row full">
+        <label for="description">Description des travaux souhaités *</label>
+        <textarea id="description" name="Description" placeholder="Décrivez votre projet : élagage, création de jardin, arrosage automatique, taille du terrain..." required></textarea>
+      </div>
+
+      <div class="form-row full">
+        <label for="photos">Photos de votre projet (optionnel)</label>
+        <input type="file" id="photos" name="Photos" accept="image/*" multiple>
+        <p class="form-hint">Vous pouvez joindre une ou plusieurs photos pour nous aider à mieux cerner votre projet.</p>
+      </div>
+
+      <div class="form-row full">
+        <label for="captchaInput">Vérification anti-robot — recopiez le code *</label>
+        <div class="captcha-box">
+          <span class="captcha-challenge" id="captchaChallenge" aria-hidden="true"></span>
+          <input type="text" id="captchaInput" name="Captcha" inputmode="numeric" autocomplete="off" maxlength="4" required>
+          <button type="button" class="captcha-refresh" id="captchaRefresh">↻ Nouveau code</button>
+        </div>
+        <p class="form-hint">Ce code change à chaque chargement et permet d'éviter les demandes automatisées.</p>
+        <p class="captcha-error" id="captchaError">Le code saisi ne correspond pas au code affiché, merci de réessayer.</p>
+      </div>
+
+      <button type="submit" class="form-submit" id="formSubmitBtn">Envoyer ma demande de devis</button>
+      <p class="form-status" id="formStatus" role="status"></p>
+    </form>
+  </div>
+</section>
+
+<footer>
+  <div class="logo">Arborea</div>
+  <div>© 2026 Arborea — Élagage, création de jardin &amp; arrosage automatique en Île-de-France — <a href="tel:0679984514">06 79 98 45 14</a></div>
+</footer>
+
+<script>
+  const menuToggle = document.getElementById('menuToggle');
+  const navLinks = document.getElementById('navLinks');
+  menuToggle.addEventListener('click', () => navLinks.classList.toggle('open'));
+
+  /* ---------- Captcha anti-robot : code à 4 chiffres, régénéré à chaque chargement ---------- */
+  let captchaValue = '';
+  const captchaChallengeEl = document.getElementById('captchaChallenge');
+  const captchaInput = document.getElementById('captchaInput');
+  const captchaError = document.getElementById('captchaError');
+  const captchaRefresh = document.getElementById('captchaRefresh');
+  const devisForm = document.getElementById('devisForm');
+  const formStatus = document.getElementById('formStatus');
+
+  function generateCaptcha(){
+    captchaValue = String(Math.floor(1000 + Math.random() * 9000));
+    captchaChallengeEl.textContent = captchaValue;
+    captchaInput.value = '';
+    captchaInput.classList.remove('invalid');
+    captchaError.classList.remove('show');
+  }
+  generateCaptcha();
+  captchaRefresh.addEventListener('click', generateCaptcha);
+
+  devisForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+
+    if (captchaInput.value.trim() !== captchaValue){
+      captchaInput.classList.add('invalid');
+      captchaError.classList.add('show');
+      captchaInput.focus();
+      return;
+    }
+
+    if (!devisForm.checkValidity()){
+      devisForm.reportValidity();
+      return;
+    }
+
+    formStatus.textContent = '✓ Votre demande a bien été enregistrée. Nous revenons vers vous sous 48h avec votre devis gratuit.';
+    devisForm.reset();
+    generateCaptcha();
+  });
+</script>
+
+</body>
+</html>
