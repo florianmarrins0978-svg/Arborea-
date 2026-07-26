@@ -339,7 +339,8 @@ IBAN : FR76 3123 3123 4500 2348 1091 175</textarea>
     totalTTCEl.textContent = formatEUR(totalTTC);
   }
 
-  function createRow(){
+  function createRow(values){
+    values = values || {};
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td class="desc-cell"><span class="cell-label">Description</span><input placeholder="Description de la prestation" class="desc"></td>
@@ -348,6 +349,9 @@ IBAN : FR76 3123 3123 4500 2348 1091 175</textarea>
       <td class="line-total"><span class="cell-label">Total HT</span><span class="line-total-value">0,00 €</span></td>
       <td class="remove-cell"><button class="remove-row" type="button" aria-label="Supprimer la ligne">×</button></td>
     `;
+    if (values.desc !== undefined) tr.querySelector('.desc').value = values.desc;
+    if (values.qty !== undefined) tr.querySelector('.qty').value = values.qty;
+    if (values.price !== undefined) tr.querySelector('.price').value = values.price;
     return tr;
   }
 
@@ -378,13 +382,6 @@ IBAN : FR76 3123 3123 4500 2348 1091 175</textarea>
   computeTotals();
 
   /* ---------- Pré-remplissage depuis une demande de devis du site ---------- */
-  function formatDateTimeFr(value){
-    if (!value) return '';
-    const d = new Date(value);
-    if (isNaN(d)) return value;
-    return d.toLocaleString('fr-FR', { dateStyle: 'long', timeStyle: 'short' });
-  }
-
   function loadFromClientRequest(){
     const params = new URLSearchParams(window.location.search);
     if (![...params.keys()].length) return;
@@ -401,18 +398,22 @@ IBAN : FR76 3123 3123 4500 2348 1091 175</textarea>
 
     const prestation = params.get('prestation') || '';
     const description = params.get('description') || '';
-    if (prestation || description){
-      const firstDesc = linesBody.querySelector('.desc');
-      firstDesc.value = [prestation, description].filter(Boolean).join(' — ');
-    }
+    const descLines = description.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
 
-    const dispo1 = formatDateTimeFr(params.get('dispo1'));
-    const dispo2 = formatDateTimeFr(params.get('dispo2'));
-    if (dispo1 || dispo2){
-      const notesEl = document.getElementById('notesField');
-      const dispoLine = 'Disponibilités indiquées par le client : ' +
-        [dispo1, dispo2].filter(Boolean).join(' / ');
-      notesEl.value = dispoLine + '\n\n' + notesEl.value;
+    if (prestation || descLines.length){
+      linesBody.innerHTML = '';
+      if (descLines.length === 0){
+        const row = createRow({ desc: prestation });
+        linesBody.appendChild(row);
+        bindRow(row);
+      } else {
+        descLines.forEach((line, idx) => {
+          const desc = (idx === 0 && prestation) ? `${prestation} — ${line}` : line;
+          const row = createRow({ desc });
+          linesBody.appendChild(row);
+          bindRow(row);
+        });
+      }
     }
 
     computeTotals();
