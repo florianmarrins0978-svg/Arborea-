@@ -523,41 +523,53 @@
 
   function parseReceiptText(text){
     const lines = text.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
-    let ttc = null, ht = null, rate = null;
+    let ttc = null, ht = null, tvaAmount = null, rate = null;
 
-    const amountPattern = /(\d{1,5}[.,]\d{2})(?!\s*%)/;
+    const amountPattern = /(\d{1,6}[.,]\d{2})(?!\s*%)/;
     const ratePattern = /(\d{1,2}(?:[.,]\d{1,2})?)\s*%/;
 
     for (const line of lines){
-      const lower = line.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-      if (ttc === null && /(total\s*ttc|net\s*a\s*payer|montant\s*ttc|total\s*a\s*(payer|regler))/.test(lower)){
+      // accents normalises (e/a/a...) pour reconnaitre aussi bien les tickets
+      // francais ("Total TTC") que portugais ("Total Factura", "Total IVA").
+      const lower = line.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+      const isTaxOrDiscountLine = /(iva|tva|promo|desconto)/.test(lower);
+
+      if (ttc === null && !isTaxOrDiscountLine &&
+          /(total\s*ttc|net\s*a\s*payer|montant\s*ttc|total\s*a\s*(payer|regler)|total\s*fact(ura)?|^total\b)/.test(lower)){
         const m = line.match(amountPattern);
         if (m) ttc = parseFloat(m[1].replace(',', '.'));
       }
-      if (ht === null && /(total\s*ht|montant\s*ht)/.test(lower)){
+      if (ht === null && /(total\s*ht|montant\s*ht|base\s*tributavel)/.test(lower)){
         const m = line.match(amountPattern);
         if (m) ht = parseFloat(m[1].replace(',', '.'));
       }
-      if (rate === null && lower.includes('tva')){
+      if (tvaAmount === null && /(total\s*iva|total\s*tva|montant\s*tva)/.test(lower)){
+        const m = line.match(amountPattern);
+        if (m) tvaAmount = parseFloat(m[1].replace(',', '.'));
+      }
+      if (rate === null && (lower.includes('tva') || lower.includes('iva'))){
         const m = line.match(ratePattern);
         if (m) rate = parseFloat(m[1].replace(',', '.'));
       }
     }
 
     if (ttc === null){
-      // dernier recours : plus grand montant détecté dans tout le texte
+      // dernier recours : plus grand montant detecte dans tout le texte
       const all = [...text.matchAll(new RegExp(amountPattern, 'g'))].map(m => parseFloat(m[1].replace(',', '.')));
       if (all.length) ttc = Math.max(...all);
     }
     if (rate === null) rate = 20;
 
-    if (ttc === null){
+    if (ttc === null && tvaAmount === null){
       return { ht: '', tva: '', fournisseur: lines[0] || '' };
     }
 
     let computedHT = ht;
-    let computedTVA = null;
-    if (computedHT !== null){
+    let computedTVA = tvaAmount;
+    if (computedTVA !== null){
+      if (computedHT === null && ttc !== null) computedHT = ttc - computedTVA;
+      if (ttc === null && computedHT !== null) ttc = computedHT + computedTVA;
+    } else if (computedHT !== null){
       computedTVA = ttc - computedHT;
     } else {
       computedHT = ttc / (1 + rate / 100);
@@ -565,8 +577,8 @@
     }
 
     return {
-      ht: Math.round(computedHT * 100) / 100,
-      tva: Math.round(computedTVA * 100) / 100,
+      ht: computedHT !== null ? Math.round(computedHT * 100) / 100 : '',
+      tva: computedTVA !== null ? Math.round(computedTVA * 100) / 100 : '',
       fournisseur: lines[0] || ''
     };
   }
