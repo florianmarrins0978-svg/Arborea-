@@ -132,13 +132,10 @@
   .live-scan-overlay[hidden]{display:none;}
   .live-scan-overlay video{
     width:100%;max-width:480px;border-radius:14px;box-shadow:0 10px 40px rgba(0,0,0,0.4);
-    border:2px solid var(--sage-light);cursor:pointer;
+    border:2px solid var(--sage-light);
   }
   .live-scan-status{
     color:var(--cream);font-size:0.95rem;font-weight:500;text-align:center;max-width:420px;
-  }
-  .live-scan-hint{
-    color:rgba(251,248,240,0.6);font-size:0.8rem;text-align:center;max-width:380px;margin-top:-0.6rem;
   }
   .live-scan-status.detecting::before{
     content:'';display:inline-block;width:0.5rem;height:0.5rem;border-radius:50%;background:var(--clay-light);
@@ -301,7 +298,6 @@
         <video id="liveScanVideo" autoplay muted playsinline></video>
         <canvas id="liveScanCanvas" hidden></canvas>
         <p class="live-scan-status" id="liveScanStatus">Pointez la caméra sur le justificatif…</p>
-        <p class="live-scan-hint">Si l'image ne se stabilise pas, touchez-la pour refaire la mise au point.</p>
         <button type="button" class="btn-scan-stop" id="stopLiveScanBtn">Arrêter le scan</button>
       </div>
       <div class="achat-form">
@@ -621,40 +617,6 @@
   let liveScanStream = null;
   let liveScanWorker = null;
 
-  async function lockLiveScanFocus(){
-    if (!liveScanStream) return;
-    const track = liveScanStream.getVideoTracks()[0];
-    if (!track || !track.getCapabilities || !track.applyConstraints) return;
-    let capabilities;
-    try{ capabilities = track.getCapabilities(); } catch(err){ return; }
-    const advanced = [];
-    if (capabilities.focusMode){
-      if (capabilities.focusMode.includes('single-shot')){
-        // Fait le point une fois puis verrouille, au lieu de chercher en continu (cause du zoom/dézoom constant).
-        advanced.push({ focusMode: 'single-shot' });
-      } else if (capabilities.focusMode.includes('manual') && capabilities.focusDistance){
-        const min = capabilities.focusDistance.min, max = capabilities.focusDistance.max;
-        const near = (typeof min === 'number' && typeof max === 'number') ? min + (max - min) * 0.25 : undefined;
-        advanced.push(near !== undefined ? { focusMode: 'manual', focusDistance: near } : { focusMode: 'manual' });
-      }
-    }
-    if (capabilities.zoom && typeof capabilities.zoom.min === 'number'){
-      advanced.push({ zoom: capabilities.zoom.min });
-    }
-    if (!advanced.length) return;
-    try{ await track.applyConstraints({ advanced }); } catch(err){ /* réglages avancés non supportés sur cet appareil */ }
-  }
-
-  liveScanVideo.addEventListener('click', () => {
-    if (!liveScanActive) return;
-    const track = liveScanStream && liveScanStream.getVideoTracks()[0];
-    if (!track || !track.getCapabilities || !track.applyConstraints) return;
-    let capabilities;
-    try{ capabilities = track.getCapabilities(); } catch(err){ return; }
-    if (!capabilities.focusMode || !capabilities.focusMode.includes('single-shot')) return;
-    track.applyConstraints({ advanced: [{ focusMode: 'single-shot' }] }).catch(() => {});
-  });
-
   async function startLiveScan(){
     if (typeof Tesseract === 'undefined'){
       ocrStatus.textContent = "Lecture automatique indisponible — merci de saisir les montants manuellement.";
@@ -683,8 +645,6 @@
     liveScanStatus.classList.remove('detecting');
     ocrStatus.textContent = '';
     liveScanActive = true;
-
-    await lockLiveScanFocus();
 
     try{
       liveScanWorker = await Tesseract.createWorker('fra');
