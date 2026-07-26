@@ -583,6 +583,22 @@
     formData.set('_template', 'table');
     formData.set('_captcha', 'false');
 
+    const devisParams = new URLSearchParams({
+      nom: document.getElementById('nom').value,
+      prenom: document.getElementById('prenom').value,
+      email: document.getElementById('email').value,
+      telephone: document.getElementById('telephone').value,
+      adresse: document.getElementById('adresse').value,
+      ville: document.getElementById('ville').value,
+      codepostal: document.getElementById('codepostal').value,
+      prestation: document.getElementById('prestation').value,
+      dispo1: document.getElementById('dispo1').value,
+      dispo2: document.getElementById('dispo2').value,
+      description: document.getElementById('description').value
+    });
+    const devisPrefillUrl = new URL('devis-modele.html', window.location.href).href + '?' + devisParams.toString();
+    formData.set('LienDevisPreRempli', devisPrefillUrl);
+
     try{
       const response = await fetch('https://formsubmit.co/ajax/arboreapro@outlook.com', {
         method: 'POST',

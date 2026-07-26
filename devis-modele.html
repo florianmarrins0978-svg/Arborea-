@@ -377,6 +377,49 @@ IBAN : FR76 3123 3123 4500 2348 1091 175</textarea>
 
   computeTotals();
 
+  /* ---------- Pré-remplissage depuis une demande de devis du site ---------- */
+  function formatDateTimeFr(value){
+    if (!value) return '';
+    const d = new Date(value);
+    if (isNaN(d)) return value;
+    return d.toLocaleString('fr-FR', { dateStyle: 'long', timeStyle: 'short' });
+  }
+
+  function loadFromClientRequest(){
+    const params = new URLSearchParams(window.location.search);
+    if (![...params.keys()].length) return;
+
+    const nom = params.get('nom') || '';
+    const prenom = params.get('prenom') || '';
+    const fullName = (prenom + ' ' + nom).trim();
+    if (fullName) document.getElementById('clientNom').value = fullName;
+    if (params.get('adresse')) document.getElementById('clientAdresse').value = params.get('adresse');
+    if (params.get('codepostal')) document.getElementById('clientCodePostal').value = params.get('codepostal');
+    if (params.get('ville')) document.getElementById('clientVille').value = params.get('ville');
+    if (params.get('telephone')) document.getElementById('clientTelephone').value = params.get('telephone');
+    if (params.get('email')) document.getElementById('clientEmail').value = params.get('email');
+
+    const prestation = params.get('prestation') || '';
+    const description = params.get('description') || '';
+    if (prestation || description){
+      const firstDesc = linesBody.querySelector('.desc');
+      firstDesc.value = [prestation, description].filter(Boolean).join(' — ');
+    }
+
+    const dispo1 = formatDateTimeFr(params.get('dispo1'));
+    const dispo2 = formatDateTimeFr(params.get('dispo2'));
+    if (dispo1 || dispo2){
+      const notesEl = document.getElementById('notesField');
+      const dispoLine = 'Disponibilités indiquées par le client : ' +
+        [dispo1, dispo2].filter(Boolean).join(' / ');
+      notesEl.value = dispoLine + '\n\n' + notesEl.value;
+    }
+
+    computeTotals();
+  }
+
+  loadFromClientRequest();
+
   /* ---------- Transfert automatique vers la facture ---------- */
   const createFactureBtn = document.getElementById('createFactureBtn');
   const DEVIS_TO_FACTURE_KEY = 'arborea_devis_to_facture';
