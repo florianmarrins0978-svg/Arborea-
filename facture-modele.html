@@ -173,15 +173,46 @@
   }
 
   @media print{
+    html{font-size:14px;}
     body{background:#fff;padding:0;}
-    .toolbar,.no-print{display:none;}
-    .page{box-shadow:none;border-radius:0;max-width:100%;animation:none;opacity:1;transform:none;padding:1.2cm;}
+    .toolbar,.no-print{display:none !important;}
+    .page{
+      box-shadow:none;border-radius:0;max-width:100%;animation:none;opacity:1;transform:none;padding:0;
+    }
     .brand-name{animation:none;}
-    .remove-row,.btn-add{display:none;}
+    .remove-row,.btn-add{display:none !important;}
+    td.remove-cell{display:none !important;}
+
+    /* Force the desktop two-column layout regardless of the device used to print */
+    .doc-header{flex-direction:row !important;padding-bottom:1rem;margin-bottom:1rem;}
+    .doc-meta{width:auto !important;min-width:200px;}
+    .doc-meta input{width:120px !important;}
+
+    .parties{grid-template-columns:1fr 1fr !important;gap:1.5rem;margin-bottom:1.2rem;}
+
+    table,thead,tbody,tr{display:revert !important;width:100% !important;}
+    thead{position:static !important;left:auto !important;}
+    tbody#linesBody tr{display:table-row !important;padding:0 !important;}
+    tbody#linesBody td{display:table-cell !important;padding:0.4rem 0.5rem !important;border:none !important;vertical-align:top;}
+    td.desc-cell{grid-column:auto !important;}
+    td.qty-cell,td.price-cell{display:table-cell !important;}
+    td.qty-cell input,td.price-cell input{text-align:right !important;}
+    td.line-total{grid-column:auto !important;text-align:right !important;padding-top:0.4rem !important;}
+    .cell-label{display:none !important;}
+
+    .totals{max-width:340px !important;margin-top:0.8rem;}
+
+    .notes{margin-top:0.9rem;}
+    .notes label{margin-bottom:0.3rem;}
+    .notes textarea{overflow:visible;min-height:0 !important;padding:0.4rem 0.6rem;}
+
     tbody input,.party.editable input,.notes textarea,.doc-meta input,.totals-row input{
       border:none;background:transparent;padding:0.2rem 0;
     }
-    @page{size:A4;margin:1.5cm;}
+
+    .doc-footer{margin-top:1.2rem;padding-top:1rem;}
+
+    @page{size:A4;margin:1.1cm;}
   }
 </style>
 </head>
@@ -386,6 +417,20 @@ IBAN : FR76 3123 3123 4500 2348 1091 175</textarea>
   });
 
   tvaRateInput.addEventListener('input', computeTotals);
+
+  /* ---------- Éviter que les zones de texte soient coupées à l'impression ---------- */
+  window.addEventListener('beforeprint', () => {
+    document.querySelectorAll('.notes textarea').forEach(t => {
+      t.dataset.previousHeight = t.style.height;
+      t.style.height = 'auto';
+      t.style.height = (t.scrollHeight + 4) + 'px';
+    });
+  });
+  window.addEventListener('afterprint', () => {
+    document.querySelectorAll('.notes textarea').forEach(t => {
+      t.style.height = t.dataset.previousHeight || '';
+    });
+  });
 
   /* ---------- Récupération automatique des données du devis ---------- */
   const DEVIS_TO_FACTURE_KEY = 'arborea_devis_to_facture';
