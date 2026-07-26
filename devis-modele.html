@@ -258,6 +258,12 @@
     <textarea id="notesField" placeholder="Acompte de 30% à la signature, solde à réception des travaux. Devis gratuit et sans engagement.">Acompte de 30% à la signature, solde à réception des travaux.</textarea>
   </div>
 
+  <div class="notes">
+    <label for="paymentField">Modalités de paiement</label>
+    <textarea id="paymentField">Paiement par virement bancaire
+IBAN : FR76 3123 3123 4500 2348 1091 175</textarea>
+  </div>
+
   <div class="doc-footer">
     <p class="legal">Devis établi par Arborea, valable selon la durée indiquée ci-dessus. Bon pour accord précédé de la mention manuscrite, daté et signé par le client.</p>
     <div class="signature">
@@ -279,7 +285,7 @@
   devisDateInput.valueAsDate = new Date();
 
   /* ---------- Mémorisation des informations de l'émetteur ---------- */
-  const issuerFieldIds = ['issuerName','issuerAddress','issuerPhone','issuerEmail','issuerSiret','issuerRcsRm'];
+  const issuerFieldIds = ['issuerName','issuerAddress','issuerPhone','issuerEmail','issuerSiret','issuerRcsRm','paymentField'];
   const ISSUER_STORAGE_KEY = 'arborea_devis_issuer';
 
   function loadIssuerInfo(){
