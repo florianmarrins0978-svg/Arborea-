@@ -489,7 +489,6 @@ IBAN : FR76 3123 3123 4500 2348 1091 175</textarea>
   /* ---------- Bouton Enregistrer en PDF ---------- */
   const savePdfBtn = document.getElementById('savePdfBtn');
   savePdfBtn.addEventListener('click', async () => {
-    logInvoiceToHistory();
     savePdfBtn.disabled = true;
     const originalLabel = savePdfBtn.textContent;
     savePdfBtn.textContent = 'Génération du PDF...';
@@ -523,6 +522,7 @@ IBAN : FR76 3123 3123 4500 2348 1091 175</textarea>
           const writable = await handle.createWritable();
           await writable.write(blob);
           await writable.close();
+          logInvoiceToHistory();
         } catch(pickerErr){
           if (pickerErr.name !== 'AbortError') throw pickerErr;
         }
@@ -535,6 +535,7 @@ IBAN : FR76 3123 3123 4500 2348 1091 175</textarea>
         a.click();
         a.remove();
         URL.revokeObjectURL(url);
+        logInvoiceToHistory();
       }
     } catch(err){
       alert("Une erreur est survenue lors de la génération du PDF. Vous pouvez utiliser le bouton \"Imprimer\" puis choisir \"Enregistrer en PDF\" comme imprimante.");
