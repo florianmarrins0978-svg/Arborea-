@@ -72,11 +72,12 @@
   .party p{font-size:0.94rem;color:var(--forest-deep);line-height:1.7;}
   .party.editable{display:grid;gap:0.6rem;}
   .party.editable input{
-    font-family:'Inter',sans-serif;font-size:0.94rem;padding:0.6rem 0.8rem;
+    width:100%;font-family:'Inter',sans-serif;font-size:0.94rem;padding:0.6rem 0.8rem;
     border:1.5px solid var(--paper-warm);border-radius:8px;background:var(--paper);color:var(--forest-deep);
   }
   .party.editable input:focus{outline:none;border-color:var(--sage);}
   .party.editable .row{display:grid;grid-template-columns:1fr 2fr;gap:0.6rem;}
+  .party.editable .field-hint{font-size:0.7rem;color:#8a8a78;margin-top:-0.2rem;}
 
   .lines{margin-bottom:1.5rem;}
   table{width:100%;border-collapse:collapse;}
@@ -94,6 +95,7 @@
   td.qty-cell input, td.price-cell input{text-align:right;}
   td.line-total{text-align:right;font-weight:600;color:var(--forest-deep);white-space:nowrap;padding-top:0.9rem;}
   td.remove-cell{text-align:center;padding-top:0.6rem;}
+  .cell-label{display:none;}
   .remove-row{
     background:none;border:none;color:#a89f8a;font-size:1.1rem;cursor:pointer;line-height:1;padding:0.3rem;
   }
@@ -135,16 +137,36 @@
   .signature p{font-size:0.78rem;color:#6b6b5c;letter-spacing:0.02em;}
 
   @media (max-width:700px){
+    body{padding:1.5rem 0.8rem 4rem;}
     .parties{grid-template-columns:1fr;}
     .doc-header{flex-direction:column;}
     .doc-meta{width:100%;}
-    thead th:nth-child(2),thead th:nth-child(3){display:none;}
-    td.qty-cell,td.price-cell{display:none;}
+    .doc-meta input{width:auto;flex:1;min-width:0;}
+
+    table,thead,tbody,tr{display:block;width:100%;}
+    thead{position:absolute;left:-9999px;top:auto;}
+    tbody#linesBody tr{
+      display:grid;grid-template-columns:1fr 1fr;gap:0.7rem 0.8rem;
+      padding:1rem 0;border-bottom:1px solid var(--paper-warm);
+    }
+    tbody#linesBody td{display:block;padding:0;border:none;vertical-align:top;}
+    td.desc-cell{grid-column:1 / -1;}
+    td.qty-cell,td.price-cell{display:block;}
+    td.line-total{grid-column:1;text-align:left;padding-top:0;}
+    td.remove-cell{grid-column:2;text-align:right;padding-top:0;align-self:end;}
+    .cell-label{
+      display:block;font-size:0.68rem;letter-spacing:0.06em;text-transform:uppercase;
+      color:#8a8a78;margin-bottom:0.3rem;
+    }
+    td.qty-cell input,td.price-cell input{text-align:left;}
+    td.line-total .line-total-value{font-family:'Inter',sans-serif;font-size:1rem;}
+
+    .totals{max-width:100%;}
   }
 
   @media print{
     body{background:#fff;padding:0;}
-    .toolbar{display:none;}
+    .toolbar,.no-print{display:none;}
     .page{box-shadow:none;border-radius:0;max-width:100%;animation:none;opacity:1;transform:none;padding:1.2cm;}
     .brand-name{animation:none;}
     .remove-row,.btn-add{display:none;}
@@ -178,9 +200,15 @@
   <div class="doc-title"><h1>Devis</h1></div>
 
   <div class="parties">
-    <div class="party">
+    <div class="party editable" id="issuerParty">
       <h3>Émetteur</h3>
-      <p>Arborea<br>Île-de-France<br>Tél. 06 79 98 45 14<br>arboreapro@outlook.com</p>
+      <input id="issuerName" value="Arborea" aria-label="Nom ou raison sociale de l'entreprise">
+      <input id="issuerAddress" placeholder="Adresse du siège social" aria-label="Adresse du siège social">
+      <input id="issuerPhone" value="06 79 98 45 14" aria-label="Téléphone">
+      <input id="issuerEmail" value="arboreapro@outlook.com" aria-label="Email">
+      <input id="issuerSiret" placeholder="N° SIREN / SIRET" aria-label="Numéro SIREN ou SIRET">
+      <input id="issuerRcsRm" placeholder="RCS ou RM — ville d'immatriculation" aria-label="RCS ou RM et ville d'immatriculation">
+      <p class="field-hint no-print">RCS si commerçant, RM (Répertoire des métiers) si artisan.</p>
     </div>
     <div class="party editable">
       <h3>Client</h3>
@@ -208,10 +236,10 @@
       </thead>
       <tbody id="linesBody">
         <tr>
-          <td><input placeholder="Ex : Élagage d'un tilleul — taille architecturée" class="desc"></td>
-          <td class="qty-cell"><input type="number" class="qty" value="1" min="0" step="1"></td>
-          <td class="price-cell"><input type="number" class="price" value="0" min="0" step="0.01"></td>
-          <td class="line-total">0,00 €</td>
+          <td class="desc-cell"><span class="cell-label">Description</span><input placeholder="Ex : Élagage d'un tilleul — taille architecturée" class="desc"></td>
+          <td class="qty-cell"><span class="cell-label">Qté</span><input type="number" class="qty" value="1" min="0" step="1"></td>
+          <td class="price-cell"><span class="cell-label">Prix unitaire HT</span><input type="number" class="price" value="0" min="0" step="0.01"></td>
+          <td class="line-total"><span class="cell-label">Total HT</span><span class="line-total-value">0,00 €</span></td>
           <td class="remove-cell"><button class="remove-row" type="button" aria-label="Supprimer la ligne">×</button></td>
         </tr>
       </tbody>
@@ -250,6 +278,30 @@
 
   devisDateInput.valueAsDate = new Date();
 
+  /* ---------- Mémorisation des informations de l'émetteur ---------- */
+  const issuerFieldIds = ['issuerName','issuerAddress','issuerPhone','issuerEmail','issuerSiret','issuerRcsRm'];
+  const ISSUER_STORAGE_KEY = 'arborea_devis_issuer';
+
+  function loadIssuerInfo(){
+    try{
+      const saved = JSON.parse(localStorage.getItem(ISSUER_STORAGE_KEY) || '{}');
+      issuerFieldIds.forEach(id => {
+        if (saved[id]) document.getElementById(id).value = saved[id];
+      });
+    } catch(e){ /* ignore corrupted storage */ }
+  }
+
+  function saveIssuerInfo(){
+    const data = {};
+    issuerFieldIds.forEach(id => { data[id] = document.getElementById(id).value; });
+    try{ localStorage.setItem(ISSUER_STORAGE_KEY, JSON.stringify(data)); } catch(e){ /* storage unavailable */ }
+  }
+
+  loadIssuerInfo();
+  issuerFieldIds.forEach(id => {
+    document.getElementById(id).addEventListener('input', saveIssuerInfo);
+  });
+
   function formatEUR(value){
     return value.toLocaleString('fr-FR', { style: 'currency', currency: 'EUR' });
   }
@@ -260,7 +312,7 @@
       const qty = parseFloat(row.querySelector('.qty').value) || 0;
       const price = parseFloat(row.querySelector('.price').value) || 0;
       const lineTotal = qty * price;
-      row.querySelector('.line-total').textContent = formatEUR(lineTotal);
+      row.querySelector('.line-total-value').textContent = formatEUR(lineTotal);
       totalHT += lineTotal;
     });
     const tvaRate = parseFloat(tvaRateInput.value) || 0;
@@ -274,10 +326,10 @@
   function createRow(){
     const tr = document.createElement('tr');
     tr.innerHTML = `
-      <td><input placeholder="Description de la prestation" class="desc"></td>
-      <td class="qty-cell"><input type="number" class="qty" value="1" min="0" step="1"></td>
-      <td class="price-cell"><input type="number" class="price" value="0" min="0" step="0.01"></td>
-      <td class="line-total">0,00 €</td>
+      <td class="desc-cell"><span class="cell-label">Description</span><input placeholder="Description de la prestation" class="desc"></td>
+      <td class="qty-cell"><span class="cell-label">Qté</span><input type="number" class="qty" value="1" min="0" step="1"></td>
+      <td class="price-cell"><span class="cell-label">Prix unitaire HT</span><input type="number" class="price" value="0" min="0" step="0.01"></td>
+      <td class="line-total"><span class="cell-label">Total HT</span><span class="line-total-value">0,00 €</span></td>
       <td class="remove-cell"><button class="remove-row" type="button" aria-label="Supprimer la ligne">×</button></td>
     `;
     return tr;
