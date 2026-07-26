@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Arborea — Modèle de devis</title>
+<title>Arborea — Modèle de facture</title>
 <meta name="color-scheme" content="only light">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -54,7 +54,7 @@
 
   .doc-header{
     display:flex;justify-content:space-between;align-items:flex-start;gap:2rem;flex-wrap:wrap;
-    padding-bottom:2rem;border-bottom:2px solid var(--forest-deep);margin-bottom:2.5rem;
+    padding-bottom:2rem;border-bottom:2px solid var(--forest-deep);margin-bottom:1.2rem;
   }
   .brand-name{
     font-size:2rem;letter-spacing:0.01em;
@@ -71,6 +71,13 @@
     text-align:right;border:none;border-bottom:1px solid var(--paper-warm);background:transparent;
     font-family:'Inter',sans-serif;font-size:0.92rem;color:var(--forest-deep);padding:0.2rem 0;width:130px;
   }
+
+  .devis-ref{
+    text-align:center;font-size:0.85rem;color:var(--clay);margin-bottom:2rem;
+    display:none;
+  }
+  .devis-ref.show{display:block;}
+
   .doc-title{text-align:center;margin-bottom:2.5rem;}
   .doc-title h1{font-size:1.6rem;letter-spacing:0.06em;text-transform:uppercase;}
 
@@ -134,14 +141,8 @@
 
   .doc-footer{
     margin-top:3rem;padding-top:2rem;border-top:1px solid var(--paper-warm);
-    display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:2rem;
   }
-  .doc-footer .legal{font-size:0.78rem;color:#7a7a6a;max-width:380px;}
-  .signature{text-align:center;min-width:220px;}
-  .signature .sign-box{
-    height:70px;border:1.5px dashed var(--paper-warm);border-radius:10px;margin-bottom:0.6rem;
-  }
-  .signature p{font-size:0.78rem;color:#6b6b5c;letter-spacing:0.02em;}
+  .doc-footer .legal{font-size:0.78rem;color:#7a7a6a;line-height:1.6;}
 
   @media (max-width:700px){
     body{padding:1.5rem 0.8rem 4rem;}
@@ -187,27 +188,28 @@
 <body>
 
 <div class="toolbar no-print">
-  <span class="brand-mini">Arborea — Modèle de devis</span>
+  <span class="brand-mini">Arborea — Modèle de facture</span>
   <div class="toolbar-actions">
-    <button class="btn-secondary" id="createFactureBtn" type="button">Valider → Créer la facture</button>
     <button class="btn-print" onclick="window.print()">Imprimer / Enregistrer en PDF</button>
   </div>
 </div>
 
-<div class="page" id="quotePage">
+<div class="page" id="invoicePage">
   <div class="doc-header">
     <div>
       <span class="brand-name">Arborea</span>
       <span class="brand-tagline">Arboriculture · Paysagisme · Île-de-France<br>06 79 98 45 14 — arboreapro@outlook.com</span>
     </div>
     <div class="doc-meta">
-      <div class="meta-row"><label for="devisNum">Devis n°</label><input id="devisNum" value="2026-001"></div>
-      <div class="meta-row"><label for="devisDate">Date</label><input id="devisDate" type="date"></div>
-      <div class="meta-row"><label for="devisValidite">Validité</label><input id="devisValidite" value="30 jours"></div>
+      <div class="meta-row"><label for="factureNum">Facture n°</label><input id="factureNum" value="F-2026-001"></div>
+      <div class="meta-row"><label for="factureDate">Date d'émission</label><input id="factureDate" type="date"></div>
+      <div class="meta-row"><label for="factureEcheance">Date d'échéance</label><input id="factureEcheance" type="date"></div>
     </div>
   </div>
 
-  <div class="doc-title"><h1>Devis</h1></div>
+  <p class="devis-ref" id="devisRef"></p>
+
+  <div class="doc-title"><h1>Facture</h1></div>
 
   <div class="parties">
     <div class="party editable" id="issuerParty">
@@ -264,8 +266,8 @@
   </div>
 
   <div class="notes">
-    <label for="notesField">Notes / conditions</label>
-    <textarea id="notesField" placeholder="Acompte de 30% à la signature, solde à réception des travaux. Devis gratuit et sans engagement.">Acompte de 30% à la signature, solde à réception des travaux.</textarea>
+    <label for="notesField">Notes</label>
+    <textarea id="notesField" placeholder="Merci de votre confiance."></textarea>
   </div>
 
   <div class="notes">
@@ -275,11 +277,9 @@ IBAN : FR76 3123 3123 4500 2348 1091 175</textarea>
   </div>
 
   <div class="doc-footer">
-    <p class="legal">Devis établi par Arborea, valable selon la durée indiquée ci-dessus. Bon pour accord précédé de la mention manuscrite, daté et signé par le client.</p>
-    <div class="signature">
-      <div class="sign-box"></div>
-      <p>Bon pour accord — signature du client</p>
-    </div>
+    <p class="legal">
+      En cas de retard de paiement, une pénalité au taux de trois fois le taux d'intérêt légal est exigible, ainsi qu'une indemnité forfaitaire pour frais de recouvrement de 40 €. Pas d'escompte pour paiement anticipé. TVA non applicable, art. 293 B du CGI (à retirer si vous êtes assujetti à la TVA).
+    </p>
   </div>
 </div>
 
@@ -290,11 +290,19 @@ IBAN : FR76 3123 3123 4500 2348 1091 175</textarea>
   const totalTVAEl = document.getElementById('totalTVA');
   const totalTTCEl = document.getElementById('totalTTC');
   const tvaRateInput = document.getElementById('tvaRate');
-  const devisDateInput = document.getElementById('devisDate');
+  const factureDateInput = document.getElementById('factureDate');
+  const factureEcheanceInput = document.getElementById('factureEcheance');
 
-  devisDateInput.valueAsDate = new Date();
+  function addDays(date, days){
+    const d = new Date(date);
+    d.setDate(d.getDate() + days);
+    return d;
+  }
 
-  /* ---------- Mémorisation des informations de l'émetteur ---------- */
+  factureDateInput.valueAsDate = new Date();
+  factureEcheanceInput.valueAsDate = addDays(new Date(), 30);
+
+  /* ---------- Mémorisation des informations de l'émetteur (partagée avec le devis) ---------- */
   const issuerFieldIds = ['issuerName','issuerAddress','issuerPhone','issuerEmail','issuerSiret','issuerRcsRm','paymentField'];
   const ISSUER_STORAGE_KEY = 'arborea_devis_issuer';
 
@@ -339,7 +347,8 @@ IBAN : FR76 3123 3123 4500 2348 1091 175</textarea>
     totalTTCEl.textContent = formatEUR(totalTTC);
   }
 
-  function createRow(){
+  function createRow(values){
+    values = values || {};
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td class="desc-cell"><span class="cell-label">Description</span><input placeholder="Description de la prestation" class="desc"></td>
@@ -348,6 +357,9 @@ IBAN : FR76 3123 3123 4500 2348 1091 175</textarea>
       <td class="line-total"><span class="cell-label">Total HT</span><span class="line-total-value">0,00 €</span></td>
       <td class="remove-cell"><button class="remove-row" type="button" aria-label="Supprimer la ligne">×</button></td>
     `;
+    if (values.desc !== undefined) tr.querySelector('.desc').value = values.desc;
+    if (values.qty !== undefined) tr.querySelector('.qty').value = values.qty;
+    if (values.price !== undefined) tr.querySelector('.price').value = values.price;
     return tr;
   }
 
@@ -375,44 +387,52 @@ IBAN : FR76 3123 3123 4500 2348 1091 175</textarea>
 
   tvaRateInput.addEventListener('input', computeTotals);
 
-  computeTotals();
-
-  /* ---------- Transfert automatique vers la facture ---------- */
-  const createFactureBtn = document.getElementById('createFactureBtn');
+  /* ---------- Récupération automatique des données du devis ---------- */
   const DEVIS_TO_FACTURE_KEY = 'arborea_devis_to_facture';
 
-  createFactureBtn.addEventListener('click', () => {
-    const lines = [];
-    linesBody.querySelectorAll('tr').forEach(row => {
-      lines.push({
-        desc: row.querySelector('.desc').value,
-        qty: row.querySelector('.qty').value,
-        price: row.querySelector('.price').value
-      });
-    });
-
-    const data = {
-      devisNum: document.getElementById('devisNum').value,
-      devisDate: document.getElementById('devisDate').value,
-      client: {
-        nom: document.getElementById('clientNom').value,
-        adresse: document.getElementById('clientAdresse').value,
-        codePostal: document.getElementById('clientCodePostal').value,
-        ville: document.getElementById('clientVille').value,
-        telephone: document.getElementById('clientTelephone').value,
-        email: document.getElementById('clientEmail').value
-      },
-      lines: lines,
-      tvaRate: tvaRateInput.value,
-      notes: document.getElementById('notesField').value
-    };
-
+  function loadFromDevis(){
+    let data;
     try{
-      localStorage.setItem(DEVIS_TO_FACTURE_KEY, JSON.stringify(data));
-    } catch(e){ /* storage unavailable */ }
+      data = JSON.parse(localStorage.getItem(DEVIS_TO_FACTURE_KEY) || 'null');
+    } catch(e){ data = null; }
+    if (!data) return;
 
-    window.location.href = 'facture-modele.html';
-  });
+    if (data.client){
+      document.getElementById('clientNom').value = data.client.nom || '';
+      document.getElementById('clientAdresse').value = data.client.adresse || '';
+      document.getElementById('clientCodePostal').value = data.client.codePostal || '';
+      document.getElementById('clientVille').value = data.client.ville || '';
+      document.getElementById('clientTelephone').value = data.client.telephone || '';
+      document.getElementById('clientEmail').value = data.client.email || '';
+    }
+
+    if (Array.isArray(data.lines) && data.lines.length){
+      linesBody.innerHTML = '';
+      data.lines.forEach(line => {
+        const row = createRow(line);
+        linesBody.appendChild(row);
+        bindRow(row);
+      });
+    }
+
+    if (data.tvaRate !== undefined) tvaRateInput.value = data.tvaRate;
+    if (data.notes) document.getElementById('notesField').value = data.notes;
+
+    if (data.devisNum){
+      const factureNumInput = document.getElementById('factureNum');
+      factureNumInput.value = 'F-' + data.devisNum;
+      const refEl = document.getElementById('devisRef');
+      const dateTxt = data.devisDate ? new Date(data.devisDate).toLocaleDateString('fr-FR') : '';
+      refEl.textContent = `Établie à partir du devis n° ${data.devisNum}${dateTxt ? ' du ' + dateTxt : ''}`;
+      refEl.classList.add('show');
+    }
+
+    try{ localStorage.removeItem(DEVIS_TO_FACTURE_KEY); } catch(e){ /* ignore */ }
+    computeTotals();
+  }
+
+  loadFromDevis();
+  computeTotals();
 </script>
 
 </body>
