@@ -109,11 +109,14 @@
   }
   thead th.num{text-align:right;}
   tbody td{padding:0.6rem;vertical-align:top;border-bottom:1px solid var(--paper-warm);}
-  tbody input{
+  tbody input,tbody textarea{
     width:100%;font-family:'Inter',sans-serif;font-size:0.92rem;padding:0.55rem 0.6rem;
     border:1.5px solid var(--paper-warm);border-radius:8px;background:var(--paper);color:var(--forest-deep);
+    box-sizing:border-box;
   }
-  tbody input:focus{outline:none;border-color:var(--sage);}
+  tbody input:focus,tbody textarea:focus{outline:none;border-color:var(--sage);}
+  /* Textarea instead of input for description: long lines wrap instead of clipping */
+  textarea.desc{resize:vertical;min-height:2.5rem;line-height:1.4;overflow:hidden;}
   td.qty-cell input, td.price-cell input{text-align:right;}
   td.line-total{text-align:right;font-weight:600;color:var(--forest-deep);white-space:nowrap;padding-top:0.9rem;}
   td.remove-cell{text-align:center;padding-top:0.6rem;}
@@ -212,9 +215,9 @@
 
     .notes{margin-top:0.9rem;}
     .notes label{margin-bottom:0.3rem;}
-    .notes textarea{overflow:visible;min-height:0 !important;padding:0.4rem 0.6rem;}
+    .notes textarea,td.desc-cell textarea{overflow:visible;min-height:0 !important;padding:0.4rem 0.6rem;resize:none;}
 
-    tbody input,.party.editable input,.notes textarea,.doc-meta input,.totals-row input{
+    tbody input,tbody textarea,.party.editable input,.notes textarea,.doc-meta input,.totals-row input{
       border:none;background:transparent;padding:0.2rem 0;
     }
 
@@ -288,7 +291,7 @@
       </thead>
       <tbody id="linesBody">
         <tr>
-          <td class="desc-cell"><span class="cell-label">Description</span><input placeholder="Ex : Élagage d'un tilleul — taille architecturée" class="desc"></td>
+          <td class="desc-cell"><span class="cell-label">Description</span><textarea rows="1" placeholder="Ex : Élagage d'un tilleul — taille architecturée" class="desc"></textarea></td>
           <td class="qty-cell"><span class="cell-label">Qté</span><input type="number" class="qty" value="1" min="0" step="1"></td>
           <td class="price-cell"><span class="cell-label">Prix unitaire HT</span><input type="number" class="price" value="0" min="0" step="0.01"></td>
           <td class="line-total"><span class="cell-label">Total HT</span><span class="line-total-value">0,00 €</span></td>
@@ -392,7 +395,7 @@ IBAN : FR76 3123 3123 4500 2348 1091 175</textarea>
     values = values || {};
     const tr = document.createElement('tr');
     tr.innerHTML = `
-      <td class="desc-cell"><span class="cell-label">Description</span><input placeholder="Description de la prestation" class="desc"></td>
+      <td class="desc-cell"><span class="cell-label">Description</span><textarea rows="1" placeholder="Description de la prestation" class="desc"></textarea></td>
       <td class="qty-cell"><span class="cell-label">Qté</span><input type="number" class="qty" value="1" min="0" step="1"></td>
       <td class="price-cell"><span class="cell-label">Prix unitaire HT</span><input type="number" class="price" value="0" min="0" step="0.01"></td>
       <td class="line-total"><span class="cell-label">Total HT</span><span class="line-total-value">0,00 €</span></td>
@@ -414,6 +417,13 @@ IBAN : FR76 3123 3123 4500 2348 1091 175</textarea>
         computeTotals();
       }
     });
+    const descField = row.querySelector('.desc');
+    const autosizeDesc = () => {
+      descField.style.height = 'auto';
+      descField.style.height = descField.scrollHeight + 'px';
+    };
+    descField.addEventListener('input', autosizeDesc);
+    autosizeDesc();
   }
 
   linesBody.querySelectorAll('tr').forEach(bindRow);
@@ -430,14 +440,14 @@ IBAN : FR76 3123 3123 4500 2348 1091 175</textarea>
 
   /* ---------- Éviter que les zones de texte soient coupées à l'impression / l'export ---------- */
   function growNotesTextareas(){
-    document.querySelectorAll('.notes textarea').forEach(t => {
+    document.querySelectorAll('.notes textarea, td.desc-cell textarea').forEach(t => {
       t.dataset.previousHeight = t.style.height;
       t.style.height = 'auto';
       t.style.height = (t.scrollHeight + 4) + 'px';
     });
   }
   function restoreNotesTextareas(){
-    document.querySelectorAll('.notes textarea').forEach(t => {
+    document.querySelectorAll('.notes textarea, td.desc-cell textarea').forEach(t => {
       t.style.height = t.dataset.previousHeight || '';
     });
   }
