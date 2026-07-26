@@ -417,19 +417,30 @@
         </div>
       </div>
 
+      <div class="form-grid">
+        <div class="form-row">
+          <label for="email">Email *</label>
+          <input type="email" id="email" name="Email" required>
+        </div>
+        <div class="form-row">
+          <label for="telephone">Téléphone (facultatif)</label>
+          <input type="tel" id="telephone" name="Telephone">
+        </div>
+      </div>
+
       <div class="form-row full">
-        <label for="email">Email *</label>
-        <input type="email" id="email" name="Email" required>
+        <label for="adresse">Adresse *</label>
+        <input type="text" id="adresse" name="Adresse" required>
       </div>
 
       <div class="form-grid">
         <div class="form-row">
-          <label for="adresse">Adresse *</label>
-          <input type="text" id="adresse" name="Adresse" required>
-        </div>
-        <div class="form-row">
           <label for="ville">Ville *</label>
           <input type="text" id="ville" name="Ville" required>
+        </div>
+        <div class="form-row">
+          <label for="codepostal">Code postal *</label>
+          <input type="text" id="codepostal" name="CodePostal" inputmode="numeric" pattern="[0-9]{5}" maxlength="5" required>
         </div>
       </div>
 
