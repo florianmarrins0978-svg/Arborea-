@@ -420,7 +420,7 @@ IBAN : FR76 3123 3123 4500 2348 1091 175</textarea>
     const descField = row.querySelector('.desc');
     const autosizeDesc = () => {
       descField.style.height = 'auto';
-      descField.style.height = descField.scrollHeight + 'px';
+      descField.style.height = (descField.scrollHeight + 4) + 'px';
     };
     descField.addEventListener('input', autosizeDesc);
     autosizeDesc();
