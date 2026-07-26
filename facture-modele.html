@@ -385,6 +385,7 @@ IBAN : FR76 3123 3123 4500 2348 1091 175</textarea>
     totalHTEl.textContent = formatEUR(totalHT);
     totalTVAEl.textContent = formatEUR(totalTVA);
     totalTTCEl.textContent = formatEUR(totalTTC);
+    window.currentInvoiceTotals = { totalHT, totalTVA, totalTTC, tvaRate };
   }
 
   function createRow(values){
@@ -443,14 +444,44 @@ IBAN : FR76 3123 3123 4500 2348 1091 175</textarea>
   window.addEventListener('beforeprint', growNotesTextareas);
   window.addEventListener('afterprint', restoreNotesTextareas);
 
+  /* ---------- Historique des factures (pour le calcul de TVA) ---------- */
+  const FACTURES_LOG_KEY = 'arborea_factures_log';
+
+  function logInvoiceToHistory(){
+    computeTotals();
+    const totals = window.currentInvoiceTotals || { totalHT: 0, totalTVA: 0, totalTTC: 0, tvaRate: 0 };
+    const record = {
+      factureNum: document.getElementById('factureNum').value || '',
+      date: document.getElementById('factureDate').value || '',
+      clientNom: document.getElementById('clientNom').value || '',
+      totalHT: totals.totalHT,
+      totalTVA: totals.totalTVA,
+      totalTTC: totals.totalTTC,
+      tvaRate: totals.tvaRate
+    };
+    if (!record.factureNum) return;
+
+    let log = [];
+    try{ log = JSON.parse(localStorage.getItem(FACTURES_LOG_KEY) || '[]'); } catch(e){ log = []; }
+    const existingIndex = log.findIndex(r => r.factureNum === record.factureNum);
+    if (existingIndex >= 0){
+      log[existingIndex] = record;
+    } else {
+      log.push(record);
+    }
+    try{ localStorage.setItem(FACTURES_LOG_KEY, JSON.stringify(log)); } catch(e){ /* storage unavailable */ }
+  }
+
   /* ---------- Bouton Imprimer ---------- */
   document.getElementById('printBtn').addEventListener('click', () => {
+    logInvoiceToHistory();
     window.print();
   });
 
   /* ---------- Bouton Enregistrer en PDF ---------- */
   const savePdfBtn = document.getElementById('savePdfBtn');
   savePdfBtn.addEventListener('click', async () => {
+    logInvoiceToHistory();
     savePdfBtn.disabled = true;
     const originalLabel = savePdfBtn.textContent;
     savePdfBtn.textContent = 'Génération du PDF...';
