@@ -521,19 +521,18 @@
   const ocrStatus = document.getElementById('ocrStatus');
   const ocrPreview = document.getElementById('ocrPreview');
 
-  function parseReceiptText(text, opts){
-    opts = opts || {};
+  function parseReceiptText(text){
     const lines = text.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
-    let ttc = null, ht = null, rate = null, matchedKeyword = false;
+    let ttc = null, ht = null, rate = null;
 
     const amountPattern = /(\d{1,5}[.,]\d{2})(?!\s*%)/;
     const ratePattern = /(\d{1,2}(?:[.,]\d{1,2})?)\s*%/;
 
     for (const line of lines){
-      const lower = line.toLowerCase();
-      if (ttc === null && /(total\s*ttc|net\s*à\s*payer|montant\s*ttc)/.test(lower)){
+      const lower = line.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+      if (ttc === null && /(total\s*ttc|net\s*a\s*payer|montant\s*ttc|total\s*a\s*(payer|regler))/.test(lower)){
         const m = line.match(amountPattern);
-        if (m){ ttc = parseFloat(m[1].replace(',', '.')); matchedKeyword = true; }
+        if (m) ttc = parseFloat(m[1].replace(',', '.'));
       }
       if (ht === null && /(total\s*ht|montant\s*ht)/.test(lower)){
         const m = line.match(amountPattern);
@@ -545,7 +544,7 @@
       }
     }
 
-    if (ttc === null && !opts.requireKeyword){
+    if (ttc === null){
       // dernier recours : plus grand montant détecté dans tout le texte
       const all = [...text.matchAll(new RegExp(amountPattern, 'g'))].map(m => parseFloat(m[1].replace(',', '.')));
       if (all.length) ttc = Math.max(...all);
@@ -553,7 +552,7 @@
     if (rate === null) rate = 20;
 
     if (ttc === null){
-      return { ht: '', tva: '', fournisseur: lines[0] || '', matched: false };
+      return { ht: '', tva: '', fournisseur: lines[0] || '' };
     }
 
     let computedHT = ht;
@@ -568,8 +567,7 @@
     return {
       ht: Math.round(computedHT * 100) / 100,
       tva: Math.round(computedTVA * 100) / 100,
-      fournisseur: lines[0] || '',
-      matched: matchedKeyword
+      fournisseur: lines[0] || ''
     };
   }
 
@@ -672,6 +670,10 @@
   }
 
   async function liveScanLoop(){
+    const STABLE_READS_NEEDED = 2;
+    let lastCandidate = null;
+    let stableCount = 0;
+
     while (liveScanActive){
       await new Promise(r => setTimeout(r, 350));
       if (!liveScanActive) break;
@@ -689,19 +691,35 @@
       try{
         const { data } = await liveScanWorker.recognize(blob);
         if (!liveScanActive) break;
-        const parsed = parseReceiptText(data.text || '', { requireKeyword: true });
-        if (parsed.matched && parsed.ht !== '' && parsed.tva !== ''){
-          if (parsed.fournisseur) achatFournisseurInput.value = parsed.fournisseur.slice(0, 60);
-          achatHTInput.value = parsed.ht;
-          achatTVAInput.value = parsed.tva;
-          ocrPreview.classList.remove('show');
-          stopLiveScan("Montants détectés — vérifiez-les avant d'ajouter l'achat.");
-          break;
+        const parsed = parseReceiptText(data.text || '');
+        if (parsed.ht !== '' && parsed.tva !== ''){
+          const candidateKey = parsed.ht + '|' + parsed.tva;
+          if (candidateKey === lastCandidate){
+            stableCount++;
+          } else {
+            lastCandidate = candidateKey;
+            stableCount = 1;
+          }
+          if (stableCount >= STABLE_READS_NEEDED){
+            if (parsed.fournisseur) achatFournisseurInput.value = parsed.fournisseur.slice(0, 60);
+            achatHTInput.value = parsed.ht;
+            achatTVAInput.value = parsed.tva;
+            ocrPreview.classList.remove('show');
+            stopLiveScan("Montants détectés — vérifiez-les avant d'ajouter l'achat.");
+            break;
+          } else {
+            liveScanStatus.textContent = 'Montant repéré, confirmation…';
+            liveScanStatus.classList.remove('detecting');
+          }
         } else {
+          lastCandidate = null;
+          stableCount = 0;
           liveScanStatus.textContent = 'Recherche des montants… rapprochez et stabilisez la caméra.';
           liveScanStatus.classList.remove('detecting');
         }
       } catch(err){
+        lastCandidate = null;
+        stableCount = 0;
         liveScanStatus.textContent = 'Recherche des montants…';
         liveScanStatus.classList.remove('detecting');
       }
