@@ -3,7 +3,7 @@ name: Deploy site to GitHub Pages
 on:
   push:
     branches:
-      - claude/arborea-landscaper-website-u7moqi
+      - main
   workflow_dispatch:
 
 permissions:
