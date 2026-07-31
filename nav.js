@@ -39,7 +39,7 @@
   nav.className = 'arborea-appnav';
   nav.setAttribute('aria-label', 'Navigation Arborea');
 
-  var html = '<a class="brand" href="index.html">Arborea</a><div class="links">';
+  var html = '<a class="brand" href="app.html">Arborea</a><div class="links">';
   PAGES.forEach(function (p) {
     var active = p.href.toLowerCase() === current ? ' active' : '';
     var aria = active ? ' aria-current="page"' : '';
