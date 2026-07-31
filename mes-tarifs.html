@@ -46,8 +46,8 @@
 
   /* ---------- Barre supérieure ---------- */
   .topbar{
-    position:sticky;top:0;z-index:20;
-    background:rgba(245,243,238,0.82);backdrop-filter:blur(14px);
+    position:static;
+    background:var(--bone);
     border-bottom:1px solid var(--line-soft);
   }
   .topbar-inner{
@@ -436,6 +436,8 @@
     if (last) last.querySelector('.f-libelle').focus();
   });
 </script>
+
+<script src="nav.js"></script>
 
 </body>
 </html>

@@ -75,11 +75,18 @@ gestes évidents, utilisable au téléphone.
 
 ## État des fichiers
 
-- `index.html` — site vitrine.
+- `index.html` — site vitrine ; son formulaire pré-remplit le devis (URL).
 - `mes-tarifs.html` — grille de prix (V1, local-first, multi-métier). **Prêt.**
-- `devis-modele.html` — générateur de devis ; sait déjà se pré-remplir par
-  paramètres d'URL (fondation du flux « voix → devis »).
+- `devis-modele.html` — générateur de devis ; se pré-remplit par paramètres
+  d'URL (fondation du flux « voix → devis ») ; bouton **« ＋ Depuis mes tarifs »**
+  qui insère les postes avec le prix issu de la grille, et reprend sa TVA par
+  défaut ; bouton « Valider → créer la facture ».
 - `facture-modele.html`, `tva-modele.html` — maquettes provisoires (cf. §4).
+- `nav.js` — barre de navigation partagée, incluse par tous les écrans outils
+  (Devis · Factures · TVA · Mes tarifs). Ajouter un écran = une ligne d'include.
+
+Connexions en place : Site → Devis, Devis → Facture, Mes tarifs → Devis,
+et une navigation commune entre les quatre écrans.
 
 ## Reste à construire
 
