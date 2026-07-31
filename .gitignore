@@ -1,0 +1,13 @@
+# Dépendances et artefacts générés — jamais versionnés.
+node_modules/
+
+# Bundle web de l'app native, régénéré par `npm run build:www`.
+www/
+
+# Projets natifs générés par `npx cap add ios|android` (voir CAPACITOR.md).
+ios/
+android/
+
+# Divers
+.DS_Store
+*.log
