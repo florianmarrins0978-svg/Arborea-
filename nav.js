@@ -18,15 +18,15 @@
   var css = '' +
     '.arborea-appnav{position:sticky;top:0;z-index:200;display:flex;align-items:center;' +
     'gap:1.2rem;flex-wrap:wrap;padding:0.7rem clamp(1rem,4vw,2rem);' +
-    'background:#152619;box-shadow:0 2px 18px rgba(21,38,25,0.18);}' +
-    '.arborea-appnav .brand{font-family:"Playfair Display",serif;font-weight:600;font-size:1.1rem;' +
-    'color:#fbf8f0;letter-spacing:0.01em;text-decoration:none;}' +
+    'background:#2f3b2f;box-shadow:0 2px 18px rgba(28,28,26,0.16);}' +
+    '.arborea-appnav .brand{font-family:"Playfair Display",Georgia,serif;font-weight:600;font-size:1.1rem;' +
+    'color:#f5f3ee;letter-spacing:0.01em;text-decoration:none;}' +
     '.arborea-appnav .links{display:flex;gap:0.25rem;flex-wrap:wrap;margin-left:auto;}' +
-    '.arborea-appnav .link{color:rgba(251,248,240,0.70);text-decoration:none;font-family:"Inter",sans-serif;' +
+    '.arborea-appnav .link{color:rgba(245,243,238,0.72);text-decoration:none;font-family:"Inter",sans-serif;' +
     'font-size:0.85rem;font-weight:500;letter-spacing:0.01em;padding:0.42rem 0.9rem;border-radius:30px;' +
     'transition:color .2s ease,background .2s ease;white-space:nowrap;}' +
-    '.arborea-appnav .link:hover{color:#fbf8f0;background:rgba(255,255,255,0.08);}' +
-    '.arborea-appnav .link.active{color:#152619;background:#fbf8f0;font-weight:600;}' +
+    '.arborea-appnav .link:hover{color:#f5f3ee;background:rgba(255,255,255,0.09);}' +
+    '.arborea-appnav .link.active{color:#1c1c1a;background:#f5f3ee;font-weight:600;}' +
     '.arborea-appnav .link:focus-visible{outline:1.5px solid #9fbd82;outline-offset:2px;}' +
     '@media print{.arborea-appnav{display:none !important;}}';
 
