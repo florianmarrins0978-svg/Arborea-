@@ -26,7 +26,7 @@ python3 -m http.server 8080 &
 BASE_URL=http://127.0.0.1:8080 node tests/e2e.js
 ```
 
-Sortie attendue : `✅ PASS: 45   ❌ FAIL: 0`. Le code de sortie est non nul si
+Sortie attendue : `✅ PASS: 52   ❌ FAIL: 0`. Le code de sortie est non nul si
 un test échoue (utilisable en intégration continue).
 
 > Note : les tests bloquent les ressources externes (polices, CDN) pour être

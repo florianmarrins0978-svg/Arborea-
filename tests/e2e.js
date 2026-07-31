@@ -155,6 +155,38 @@ function ok(name, cond){ if (cond) pass++; else { fail++; fails.push(name); } }
     await page.close();
   }
 
+  // 7) Envoi au client : partage natif mobile avec le PDF joint (html2pdf + share simulés)
+  {
+    const cShare = await browser.newContext();
+    await cShare.route(/googleapis|gstatic|cloudflare|jsdelivr/i, r => r.abort());
+    const page = await cShare.newPage();
+    const errs = []; page.on('pageerror', e => errs.push('envoi: ' + e.message));
+    await page.addInitScript(() => {
+      window.__shareCalls = [];
+      const fakeBlob = new Blob(['%PDF-1.4'], { type: 'application/pdf' });
+      window.html2pdf = () => ({ set: () => ({ from: () => ({ outputPdf: async () => fakeBlob }) }) });
+      Object.defineProperty(navigator, 'canShare', { configurable: true, value: d => !!(d && d.files) });
+      Object.defineProperty(navigator, 'share', { configurable: true, value: async d => {
+        window.__shareCalls.push({ title: d.title, text: d.text, files: (d.files || []).map(f => ({ name: f.name, type: f.type })) });
+      }});
+    });
+    await page.goto(`${B}/devis-modele.html`, { waitUntil: 'domcontentloaded' }); await page.waitForTimeout(150);
+    ok('bouton « Envoyer au client » présent', (await page.$('#sendClientBtn')) !== null);
+    await page.fill('#devisNum', '2026-042');
+    await page.fill('#clientNom', 'Marie Martin');
+    await page.$eval('#linesBody tr .price', el => { el.value = '600'; el.dispatchEvent(new Event('input')); });
+    await page.click('#sendClientBtn'); await page.waitForTimeout(300);
+    const calls = await page.evaluate(() => window.__shareCalls);
+    ok('envoi : partage natif déclenché', calls.length === 1);
+    ok('envoi : PDF joint (application/pdf)', calls[0] && calls[0].files.length === 1 && calls[0].files[0].type === 'application/pdf');
+    ok('envoi : nom du fichier = Devis-2026-042.pdf', calls[0] && calls[0].files[0].name === 'Devis-2026-042.pdf');
+    ok('envoi : objet contient le n° de devis', calls[0] && /2026-042/.test(calls[0].title));
+    ok('envoi : message nomme le client', calls[0] && /Marie Martin/.test(calls[0].text));
+    ok('envoi : aucune erreur JS', errs.length === 0);
+    if (errs.length) fails.push(...errs);
+    await cShare.close();
+  }
+
   await browser.close();
   console.log(`\n✅ PASS: ${pass}   ❌ FAIL: ${fail}`);
   if (fails.length){ console.log('\nÉchecs :'); fails.forEach(f => console.log('  - ' + f)); }
