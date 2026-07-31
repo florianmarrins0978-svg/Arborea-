@@ -14,6 +14,50 @@ total (tout reste visible et réversible sur GitHub).
 Après chaque PR fusionnée, repartir de `main` à jour pour la suite (ne pas
 empiler sur une branche déjà fusionnée).
 
+## Passation entre sessions — état au 2026-07-31
+
+À lire en premier dans une nouvelle session pour reprendre sans rien réapprendre.
+
+**Séparation appli / site vitrine (décidé).**
+- Le **site vitrine** (pour les clients) reste dans le dépôt **`Arborea-`**
+  (`index.html`, `index-classic.html`, `Le vrai .html`, `images/`).
+- L'**appli du patron** doit vivre dans son **propre dépôt : `atlas-app`**
+  (`github.com/florianmarrins0978-svg/atlas-app`), avec sa propre adresse
+  `https://florianmarrins0978-svg.github.io/atlas-app/`.
+
+**Migration à faire (dès qu'une session a accès à `atlas-app`).**
+Copier vers `atlas-app` UNIQUEMENT l'appli :
+`app.html`, `devis-vocal.html`, `devis-modele.html`, `facture-modele.html`,
+`tva-modele.html`, `mes-tarifs.html`, `nav.js`, `PRINCIPES.md`, `CAPACITOR.md`,
+`package.json`, `capacitor.config.json`, `scripts/`, `tests/`, `.gitignore`
+— **plus** un `index.html` racine qui redirige vers `app.html`, **plus** le
+workflow Pages (`.github/workflows/pages.yml`, déclenché sur `main`).
+**Ne pas** copier le site vitrine (`index.html` vitrine, `index-classic.html`,
+`Le vrai .html`, `images/`). Puis retirer l'appli de `Arborea-` (source unique).
+
+**Nom du produit — question ouverte.** Le dépôt s'appelle « atlas-app » ;
+l'interface affiche encore « Arborea ». À confirmer avec le patron : renommer
+l'appli à l'écran en « Atlas », ou garder « Arborea » dans l'appli ?
+
+**Objectif : App Store + Google Play.** La coque Capacitor est déjà en place
+(cf. `CAPACITOR.md`). Le web reste la version de test (lien instantané) ; les
+apps natives se buildent depuis le même code, le jour venu (Mac + Apple
+Developer 99 $/an ; Android Studio + Google Play 25 $).
+
+**État V1 (fait et testé, 52 tests e2e au vert).**
+Dictée (transcription navigateur) → devis (depuis la grille de tarifs) → PDF →
+**envoi au client** (partage natif mobile / e-mail sur PC). Grille de tarifs,
+navigation commune, identité charbon/pin, coque Capacitor iOS+Android scaffoldée.
+
+**Reste à faire.**
+1. **Dictée intelligente (Claude)** pour comprendre toutes les tournures.
+   Nécessite une clé API. Modèle commercial confirmé : **une seule clé, côté
+   serveur du vendeur** (jamais chez les patrons) ; les patrons paient un
+   **abonnement** (Stripe) ; le backend reste **sans mémoire** des clients des
+   patrons. Point de branchement prêt : `extractDevis()` dans `devis-vocal.html`.
+2. Micro natif dans l'app (plugin `@capacitor-community/speech-recognition`).
+3. Plus tard : abonnements, domaine, branchement facturation par API.
+
 ## La valeur du produit
 
 Le cœur, c'est le maillon **chantier → devis** : le patron enregistre une note
