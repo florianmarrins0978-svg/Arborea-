@@ -7,6 +7,7 @@
    ======================================================================= */
 (function () {
   var PAGES = [
+    { href: 'devis-vocal.html',    label: 'Nouveau devis' },
     { href: 'devis-modele.html',   label: 'Devis' },
     { href: 'facture-modele.html', label: 'Factures' },
     { href: 'tva-modele.html',     label: 'TVA déductible' },

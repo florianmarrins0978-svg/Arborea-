@@ -3,6 +3,17 @@
 > Ce document est la référence. Toute décision de conception doit le respecter.
 > Il sert aussi de mémoire entre les sessions de travail : à lire en premier.
 
+## Mode de travail : autonomie complète
+
+Le patron a délégué l'exécution technique de bout en bout (le 2026-07-31).
+Concrètement : construire → committer → ouvrir la Pull Request → **fusionner
+soi-même** → vérifier la mise en ligne → prévenir « c'est publié ». Pas de
+demande de confirmation à chaque étape. Le patron garde un droit de regard
+total (tout reste visible et réversible sur GitHub).
+
+Après chaque PR fusionnée, repartir de `main` à jour pour la suite (ne pas
+empiler sur une branche déjà fusionnée).
+
 ## La valeur du produit
 
 Le cœur, c'est le maillon **chantier → devis** : le patron enregistre une note
@@ -77,20 +88,30 @@ gestes évidents, utilisable au téléphone.
 
 - `index.html` — site vitrine ; son formulaire pré-remplit le devis (URL).
 - `mes-tarifs.html` — grille de prix (V1, local-first, multi-métier). **Prêt.**
+- `devis-vocal.html` — **cœur du produit.** Dictée (transcription in-browser via
+  l'API Web Speech, gratuite, sans clé) → extraction rule-based rapprochée de la
+  grille (aucun prix inventé : un moyen absent est signalé « à définir ») →
+  aperçu → passage au devis pré-rempli. La fonction `extractDevis()` est le point
+  de branchement pour une extraction par LLM (Claude) plus tard.
 - `devis-modele.html` — générateur de devis ; se pré-remplit par paramètres
-  d'URL (fondation du flux « voix → devis ») ; bouton **« ＋ Depuis mes tarifs »**
-  qui insère les postes avec le prix issu de la grille, et reprend sa TVA par
-  défaut ; bouton « Valider → créer la facture ».
+  d'URL, par un **devis vocal** (`arborea_voice_devis`), et via le bouton
+  **« ＋ Depuis mes tarifs »** (prix issu de la grille, TVA par défaut reprise) ;
+  bouton « Valider → créer la facture ».
 - `facture-modele.html`, `tva-modele.html` — maquettes provisoires (cf. §4).
 - `nav.js` — barre de navigation partagée, incluse par tous les écrans outils
-  (Devis · Factures · TVA · Mes tarifs). Ajouter un écran = une ligne d'include.
+  (Nouveau devis · Devis · Factures · TVA · Mes tarifs). Ajouter un écran = une
+  ligne d'include.
 
-Connexions en place : Site → Devis, Devis → Facture, Mes tarifs → Devis,
-et une navigation commune entre les quatre écrans.
+Connexions en place : Site → Devis, Voix → Devis, Devis → Facture,
+Mes tarifs → Devis, et une navigation commune entre les écrans.
 
 ## Reste à construire
 
-1. Backend serverless « voix → JSON » (transcription + extraction respectant la
-   grille, sans mémoire). Seule brique qui a besoin d'un serveur (clés API).
-2. Branchement note vocale → écran de vérif → `devis-modele.html`.
-3. Plus tard : abonnements (Stripe), nom de domaine, branchement facturation API.
+1. **Extraction par LLM (Claude).** L'extraction actuelle est rule-based (bonne
+   pour démarrer, sans clé). Pour comprendre finement le langage naturel du
+   chantier, la brancher sur Claude via un petit backend serverless sans
+   mémoire. Nécessite une clé API (côté patron/abonnement). Point de branchement
+   déjà prêt : `extractDevis()` dans `devis-vocal.html`.
+2. Envoi du devis par mail (aujourd'hui : PDF à télécharger puis joindre).
+3. Plus tard : abonnements (Stripe), nom de domaine, branchement facturation API
+   (Pennylane, Evoliz, Tiime…), calendrier et validation de fin de chantier.
