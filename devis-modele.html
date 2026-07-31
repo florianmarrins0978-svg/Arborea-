@@ -11,15 +11,16 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <style>
   :root{
-    --cream:#fbf8f0; --paper:#f4f0e4; --paper-warm:#eae3cd;
-    --forest-deep:#152619; --forest:#1f3626; --forest-mid:#2c4a30;
+    /* Palette alignée sur l'identité Arborea : os / charbon / pin */
+    --cream:#faf9f5; --paper:#efece4; --paper-warm:#e2ded3;
+    --forest-deep:#1c1c1a; --forest:#2f3b2f; --forest-mid:#4f5f4c;
     --sage:#7d9a6d; --sage-light:#9fbd82;
-    --clay:#b5562a; --clay-light:#d97a4d;
-    --ink:#26261f;
+    --clay:#2f3b2f; --clay-light:#4f5f4c;
+    --ink:#1c1c1a;
   }
   *{margin:0;padding:0;box-sizing:border-box;}
   body{
-    background:#e9e4d6;
+    background:#e7e3da;
     color:var(--ink);
     font-family:'Inter',sans-serif;
     line-height:1.6;
@@ -35,7 +36,7 @@
   .btn-print{
     background:var(--clay);color:var(--cream);border:none;border-radius:30px;
     padding:0.85rem 1.8rem;font-weight:600;font-size:0.9rem;letter-spacing:0.02em;cursor:pointer;
-    box-shadow:0 8px 20px rgba(181,86,42,0.22);transition:background .2s ease, transform .2s ease;
+    box-shadow:0 8px 20px rgba(31,42,31,0.18);transition:background .2s ease, transform .2s ease;
   }
   .btn-print:hover{background:var(--clay-light);transform:translateY(-1px);}
   .btn-secondary{
@@ -587,7 +588,134 @@ IBAN : FR76 3123 3123 4500 2348 1091 175</textarea>
 
     window.location.href = 'facture-modele.html';
   });
+
+  /* ---------- Insertion de lignes depuis la grille « Mes tarifs » ----------
+     Les prix viennent UNIQUEMENT de la grille du patron. Si un poste n'a pas
+     de prix, la ligne est ajoutée à 0 (à compléter) — jamais un prix inventé. */
+  (function(){
+    const TARIFS_KEY = 'arborea_tarifs';
+    const UNITE_LABELS = {
+      'jour':'jour','demi-journee':'½ journée','heure':'heure','forfait':'forfait',
+      'm2':'m²','ml':'ml','m3':'m³','unite':'u','tonne':'t'
+    };
+
+    function readTarifs(){
+      try{ return JSON.parse(localStorage.getItem(TARIFS_KEY) || 'null'); }
+      catch(e){ return null; }
+    }
+
+    /* TVA par défaut issue de la grille (si absente, on ne touche à rien). */
+    const tarifs = readTarifs();
+    if (tarifs && tarifs.tvaDefault != null && !isNaN(parseFloat(tarifs.tvaDefault))){
+      tvaRateInput.value = parseFloat(tarifs.tvaDefault);
+      computeTotals();
+    }
+
+    /* Styles du sélecteur. */
+    const css = `
+      .btn-from-tarifs{border-style:solid;border-color:var(--forest);color:var(--forest-deep);background:var(--paper);}
+      .btn-from-tarifs:hover{background:var(--paper-warm);}
+      .tarif-overlay{position:fixed;inset:0;z-index:300;background:rgba(21,38,25,0.45);
+        display:flex;align-items:center;justify-content:center;padding:1.2rem;}
+      .tarif-overlay[hidden]{display:none;}
+      .tarif-box{background:var(--cream);border-radius:16px;width:100%;max-width:520px;max-height:82vh;
+        display:flex;flex-direction:column;box-shadow:0 30px 80px rgba(21,38,25,0.35);overflow:hidden;}
+      .tarif-head{display:flex;align-items:center;justify-content:space-between;padding:1.3rem 1.5rem 0.6rem;}
+      .tarif-head h3{font-size:1.3rem;}
+      .tarif-x{background:none;border:none;font-size:1.5rem;color:#a89f8a;cursor:pointer;line-height:1;padding:0.2rem;}
+      .tarif-x:hover{color:var(--clay);}
+      .tarif-sub{padding:0 1.5rem 1rem;font-size:0.85rem;color:#6b6b5c;}
+      .tarif-body{overflow-y:auto;padding:0 1.2rem 1.2rem;display:flex;flex-direction:column;gap:0.5rem;}
+      .tarif-item{display:flex;align-items:center;justify-content:space-between;gap:1rem;text-align:left;
+        background:var(--paper);border:1.5px solid var(--paper-warm);border-radius:10px;padding:0.8rem 1rem;
+        cursor:pointer;font-family:inherit;transition:border-color .15s ease,background .15s ease,transform .1s ease;}
+      .tarif-item:hover{border-color:var(--sage);background:#fff;}
+      .tarif-item.added{border-color:var(--sage-light);background:#eef3e6;transform:scale(0.99);}
+      .ti-lib{font-weight:500;color:var(--forest-deep);font-size:0.95rem;}
+      .ti-meta{display:flex;align-items:center;gap:0.6rem;white-space:nowrap;}
+      .ti-tag{font-size:0.64rem;letter-spacing:0.06em;text-transform:uppercase;color:var(--clay);
+        border:1px solid var(--clay-light);border-radius:20px;padding:0.1rem 0.5rem;}
+      .ti-prix{font-weight:600;color:var(--forest);font-size:0.9rem;}
+      .tarif-empty{text-align:center;padding:2rem 1rem;color:#6b6b5c;line-height:1.8;}
+      .tarif-empty a{color:var(--forest);font-weight:600;}
+    `;
+    const style = document.createElement('style');
+    style.textContent = css;
+    document.head.appendChild(style);
+
+    /* Bouton "Depuis mes tarifs" placé avant "+ Ajouter une ligne". */
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'btn-add btn-from-tarifs no-print';
+    btn.id = 'addFromTarifs';
+    btn.style.marginRight = '0.6rem';
+    btn.textContent = '＋ Depuis mes tarifs';
+    addRowBtn.parentNode.insertBefore(btn, addRowBtn);
+
+    /* Modale de sélection. */
+    const overlay = document.createElement('div');
+    overlay.className = 'tarif-overlay no-print';
+    overlay.hidden = true;
+    overlay.innerHTML = `
+      <div class="tarif-box" role="dialog" aria-modal="true" aria-labelledby="tarifTitle">
+        <div class="tarif-head">
+          <h3 id="tarifTitle">Depuis mes tarifs</h3>
+          <button type="button" class="tarif-x" aria-label="Fermer">×</button>
+        </div>
+        <p class="tarif-sub">Cliquez un poste pour l'ajouter au devis. Le prix vient de votre grille — ajustez ensuite la quantité (jours, heures…) sur la ligne.</p>
+        <div class="tarif-body"></div>
+      </div>`;
+    document.body.appendChild(overlay);
+    const listBox = overlay.querySelector('.tarif-body');
+
+    function itemButton(item, kindLabel){
+      const prix = (item.prix != null && !isNaN(parseFloat(item.prix))) ? parseFloat(item.prix) : null;
+      const unite = UNITE_LABELS[item.unite] || item.unite || '';
+      const prixTxt = prix != null
+        ? prix.toLocaleString('fr-FR', { style:'currency', currency:'EUR' }) + (unite ? ' / ' + unite : '')
+        : 'prix à définir';
+      const el = document.createElement('button');
+      el.type = 'button';
+      el.className = 'tarif-item';
+      const tag = kindLabel ? '<span class="ti-tag">' + kindLabel + '</span>' : '';
+      el.innerHTML = '<span class="ti-lib">' + (item.libelle || '(sans nom)') + '</span>' +
+                     '<span class="ti-meta">' + tag + '<span class="ti-prix">' + prixTxt + '</span></span>';
+      el.addEventListener('click', () => {
+        const row = createRow({ desc: item.libelle || '', qty: 1, price: prix != null ? prix : 0 });
+        linesBody.appendChild(row);
+        bindRow(row);
+        computeTotals();
+        el.classList.add('added');
+        setTimeout(() => el.classList.remove('added'), 700);
+      });
+      return el;
+    }
+
+    function onKey(e){ if (e.key === 'Escape') closeModal(); }
+    function closeModal(){ overlay.hidden = true; document.removeEventListener('keydown', onKey); }
+    function openModal(){
+      const t = readTarifs();
+      listBox.innerHTML = '';
+      const res = (t && Array.isArray(t.ressources)) ? t.ressources.filter(r => r && (r.libelle||'').trim()) : [];
+      const forf = (t && Array.isArray(t.forfaits)) ? t.forfaits.filter(r => r && (r.libelle||'').trim()) : [];
+      if (!res.length && !forf.length){
+        listBox.innerHTML = '<div class="tarif-empty">Votre grille de tarifs est vide.<br>' +
+          '<a href="mes-tarifs.html">Renseigner mes tarifs →</a></div>';
+      } else {
+        res.forEach(r => listBox.appendChild(itemButton(r, '')));
+        forf.forEach(f => listBox.appendChild(itemButton(f, 'forfait')));
+      }
+      overlay.hidden = false;
+      document.addEventListener('keydown', onKey);
+    }
+
+    btn.addEventListener('click', openModal);
+    overlay.querySelector('.tarif-x').addEventListener('click', closeModal);
+    overlay.addEventListener('click', (e) => { if (e.target === overlay) closeModal(); });
+  })();
 </script>
+
+<script src="nav.js"></script>
 
 </body>
 </html>

@@ -12,15 +12,16 @@
 <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5.0.4/dist/tesseract.min.js"></script>
 <style>
   :root{
-    --cream:#fbf8f0; --paper:#f4f0e4; --paper-warm:#eae3cd;
-    --forest-deep:#152619; --forest:#1f3626; --forest-mid:#2c4a30;
+    /* Palette alignée sur l'identité Arborea : os / charbon / pin */
+    --cream:#faf9f5; --paper:#efece4; --paper-warm:#e2ded3;
+    --forest-deep:#1c1c1a; --forest:#2f3b2f; --forest-mid:#4f5f4c;
     --sage:#7d9a6d; --sage-light:#9fbd82;
-    --clay:#b5562a; --clay-light:#d97a4d;
-    --ink:#26261f;
+    --clay:#2f3b2f; --clay-light:#4f5f4c;
+    --ink:#1c1c1a;
   }
   *{margin:0;padding:0;box-sizing:border-box;}
   body{
-    background:#e9e4d6;
+    background:#e7e3da;
     color:var(--ink);
     font-family:'Inter',sans-serif;
     line-height:1.6;
@@ -36,7 +37,7 @@
   .btn-print{
     background:var(--clay);color:var(--cream);border:none;border-radius:30px;
     padding:0.85rem 1.8rem;font-weight:600;font-size:0.9rem;letter-spacing:0.02em;cursor:pointer;
-    box-shadow:0 8px 20px rgba(181,86,42,0.22);transition:background .2s ease, transform .2s ease;
+    box-shadow:0 8px 20px rgba(31,42,31,0.18);transition:background .2s ease, transform .2s ease;
   }
   .btn-print:hover{background:var(--clay-light);transform:translateY(-1px);}
   .btn-secondary{
@@ -812,6 +813,8 @@
     }
   });
 </script>
+
+<script src="nav.js"></script>
 
 </body>
 </html>
