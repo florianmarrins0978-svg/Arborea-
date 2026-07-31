@@ -552,6 +552,34 @@ IBAN : FR76 3123 3123 4500 2348 1091 175</textarea>
 
   loadFromClientRequest();
 
+  /* ---------- Pré-remplissage depuis un devis vocal ---------- */
+  function loadFromVoice(){
+    let payload = null;
+    try{ payload = JSON.parse(localStorage.getItem('arborea_voice_devis') || 'null'); }catch(e){}
+    if (!payload) return;
+    try{ localStorage.removeItem('arborea_voice_devis'); }catch(e){}
+
+    const c = payload.client || {};
+    const setIf = (id, val) => { if (val) document.getElementById(id).value = val; };
+    setIf('clientNom', c.nom);
+    setIf('clientAdresse', c.adresse);
+    setIf('clientCodePostal', c.codePostal);
+    setIf('clientVille', c.ville);
+    setIf('clientTelephone', c.telephone);
+    setIf('clientEmail', c.email);
+
+    if (Array.isArray(payload.lines) && payload.lines.length){
+      linesBody.innerHTML = '';
+      payload.lines.forEach(l => {
+        const row = createRow({ desc: l.desc || '', qty: l.qty != null ? l.qty : 1, price: l.price != null ? l.price : 0 });
+        linesBody.appendChild(row);
+        bindRow(row);
+      });
+      computeTotals();
+    }
+  }
+  loadFromVoice();
+
   /* ---------- Transfert automatique vers la facture ---------- */
   const createFactureBtn = document.getElementById('createFactureBtn');
   const DEVIS_TO_FACTURE_KEY = 'arborea_devis_to_facture';
