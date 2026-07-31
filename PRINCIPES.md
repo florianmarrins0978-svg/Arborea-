@@ -86,7 +86,11 @@ gestes évidents, utilisable au téléphone.
 
 ## État des fichiers
 
-- `index.html` — site vitrine ; son formulaire pré-remplit le devis (URL).
+- `index.html` — **site vitrine** (pour les clients). Volontairement **séparé
+  de l'appli** : l'appli ne renvoie jamais vers lui.
+- `app.html` — **porte d'entrée de l'appli** (espace pro du patron). Tableau de
+  bord : Nouveau devis (dictée), Mes tarifs, Devis, Factures, TVA. C'est le lien
+  à ouvrir/épingler. Le logo de la nav pointe ici (plus vers la vitrine).
 - `mes-tarifs.html` — grille de prix (V1, local-first, multi-métier). **Prêt.**
 - `devis-vocal.html` — **cœur du produit.** Dictée (transcription in-browser via
   l'API Web Speech, gratuite, sans clé) → extraction rule-based rapprochée de la
